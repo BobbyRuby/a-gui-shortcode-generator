@@ -1,0 +1,90 @@
+span.error {
+    color: red;
+}
+
+#inline_styles, #class {
+    width: 100%;
+}
+
+#agsg_shortcode_preview textarea {
+    display: block;
+    width: 100%;
+}
+
+#agsg_shortcode_preview h4 {
+    background: none repeat scroll 0 0 #dedeee;
+}
+
+#plugin_settings tr {
+    position: relative;
+}
+
+#map_attributes {
+    display: none;
+    background: none repeat scroll 0 0 #111111;
+    box-shadow: -1px 0 1px #000;
+    color: white;
+    padding: 10px 15px 15px 10px;
+    position: fixed;
+    right: 0px;
+    width: 250px;
+    z-index: 100;
+}
+
+#add_shortcode_att {
+    display: none;
+    background: none repeat scroll 0 0 #111111;
+    box-shadow: -1px 0 1px #000;
+    color: white;
+    padding: 10px 15px 15px 10px;
+    position: absolute;
+    right: 0px;
+    width: 250px;
+    zoom: 1;
+    filter: alpha(opacity=1);
+    opacity: 0.1;
+}
+
+#add_html_tag_att {
+    display: none;
+    background: none repeat scroll 0 0 #111111;
+    box-shadow: -1px 0 1px #000;
+    color: white;
+    padding: 10px 15px 15px 10px;
+    position: absolute;
+    right: 0px;
+    width: 250px;
+    zoom: 1;
+    filter: alpha(opacity=1);
+    opacity: 0.1;
+}
+
+#add_shortcode_att:hover, #add_html_tag_att:hover {
+    background: none repeat scroll 0 0 #333333;
+    color: #2ea2cc;
+    cursor: pointer;
+    zoom: 0;
+    filter: alpha(opacity=75);
+    opacity: 0.75;
+}
+
+#add_att_description {
+    display: inline-block;
+    padding-right: 3%;
+    padding-top: 3%;
+}
+
+.dashicons-plus-alt:before {
+    font-size: 30px;
+}
+
+.dashicons-dismiss {
+    color: red;
+    background-color: #fff;
+    border: 1px solid #000;
+    border-radius: 50px;
+}
+
+#attribute_matching_form {
+    text-align: center;
+}
