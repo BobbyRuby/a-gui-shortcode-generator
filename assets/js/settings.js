@@ -114,7 +114,7 @@ jQuery(document).ready(function ($) {
      */
 
 
-        // prevent attribute_matching_form submit  @todo - may not need
+        // prevent attribute_matching_form submit
     jQuery("#attribute_matching_form").submit(function (event) {
         // setup some local variables
         var form = jQuery(this);
@@ -122,6 +122,7 @@ jQuery(document).ready(function ($) {
         var inputs = jQuery(form).find("input, select, button, textarea");
         // serialize the data in the form
         serializedMatchData = jQuery(form).serialize();
+        alert(serializedMatchData);
         // prevent default posting of form
         event.preventDefault();
     });
@@ -195,8 +196,8 @@ jQuery(document).ready(function ($) {
         if (!error) {
             // build selects
             for (var i = 0; i < longest; i++) {
-                selects += '<select id="match_html_tag_att_name_' + i + '" name="match_html_tag_att_name_' + i + '[]">' + html_att_options + '</select> = ';
-                selects += '<select id="match_att_name_' + i + '" name="match_att_name_' + i + '[]">' + att_options + '</select>';
+                selects += '<select id="match_html_tag_att_name_' + i + '" name="match_html_tag_att_name[]">' + html_att_options + '</select> = ';
+                selects += '<select id="match_att_name_' + i + '" name="match_att_name[]">' + att_options + '</select>';
             }
             html += selects;
             html += '<br/><p style="text-align: center;"><input name="submit_attribute_matching_form" type="submit" class="button-primary" value="Set Mapping" /></p>';
@@ -212,7 +213,7 @@ jQuery(document).ready(function ($) {
         if (val == 'Yes') {
             htmlTagATTList.push('html_tag_att_name');
             var html = '<tr class="html_tag_template_name"><th scope="row">HTML TAG Attribute 1 Name</th><td><input type="text" value="" placeholder="" name="agsg_html_tag_att_name[]" id="html_tag_att_name">' +
-                '<label for="html_tag_att_name"><span class="description">This is the name for the HTML TAG attribute.<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this attribute and the default vaule associated with it."></span></span></label>' +
+                '<label for="html_tag_att_name"><span class="description">This is the name for the HTML TAG attribute.<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this attribute and the static vaule associated with it."></span></span></label>' +
                 '</td></tr>';
             html += '<tr class="html_tag_template_value"><th scope="row">HTML TAG Attribute 1 Set Value</th><td><input type="text" value="" placeholder="" name="agsg_html_tag_default[]" id="html_tag_default">' +
                 '<label for="html_tag_default"><span class="description">The SET value for the attribute.  If you want to match the HTML TAG attribute name with a shortcode attribute value, leave this blank.  If you intend on this HTML TAG attribute value staying the same each time this shortcode is used, then fill this in.</span></label>' +
@@ -220,9 +221,10 @@ jQuery(document).ready(function ($) {
             jQuery(this).parent().parent().parent().after(html);
             jQuery('[for="html_tag_att_name"] .dashicons-dismiss').click(function (e) {
 //                if(jQuery('#has_atts_Yes').is(':checked')){
-                if (window.confirm("You will lose this HTML TAG attribute. Continue?")) {
+                if (window.confirm("You will lose this HTML TAG attribute and must reset attribute mapping.. Continue?")) {
                     jQuery(this).parent().parent().parent().parent().next().remove();
                     jQuery(this).parent().parent().parent().parent().remove();
+                    serializedMatchData = 0;
                     // cycle through list of tag ids
                     for (var i = 0; i < htmlTagATTList.length; i++) {
                         // check current id is the same as the -this-
@@ -239,6 +241,7 @@ jQuery(document).ready(function ($) {
             }
         } else {
             if (window.confirm("You will lose all attributes. Continue?")) {
+                serializedMatchData = 0;
                 jQuery('[name="agsg_html_tag_att_name[]"]').parent().parent().remove();
                 jQuery('[name="agsg_html_tag_default[]"]').parent().parent().remove();
                 jQuery('#add_html_tag_att').hide();
@@ -260,7 +263,9 @@ jQuery(document).ready(function ($) {
         jQuery("input", name_clone).attr('id', jQuery("input", name_clone).attr('id') + '_' + count);
         jQuery("label", name_clone).attr('for', jQuery("label", name_clone).attr('for') + '_' + count);
         jQuery(".error", name_clone).remove();
+
         htmlTagATTList.push('html_tag_att_name_' + count);
+
         jQuery(".dashicons-dismiss", name_clone).show();
         var value_clone = jQuery('.html_tag_template_value').clone(true, true).removeClass('html_tag_template_value');
         jQuery("th", value_clone).text('HTML TAG Attribute ' + count + ' Set Value');
@@ -288,7 +293,8 @@ jQuery(document).ready(function ($) {
             jQuery(this).parent().parent().parent().after(html);
             jQuery('[for="att_name"] .dashicons-dismiss').click(function (e) {
 //                if(jQuery('#has_atts_Yes').is(':checked')){
-                if (window.confirm("You will lose this attribute. Continue?")) {
+                if (window.confirm("You will lose this attribute and must reset attribute mapping..")) {
+                    serializedMatchData = 0;
                     jQuery(this).parent().parent().parent().parent().next().remove();
                     jQuery(this).parent().parent().parent().parent().remove();
                     // cycle through list of shortcode ids
@@ -307,6 +313,7 @@ jQuery(document).ready(function ($) {
             }
         } else {
             if (window.confirm("You will lose all attributes. Continue?")) {
+                serializedMatchData = 0;
                 jQuery('[name="agsg_att_name[]"]').parent().parent().remove();
                 jQuery('[name="agsg_default[]"]').parent().parent().remove();
                 jQuery('#add_shortcode_att').hide();
@@ -381,6 +388,11 @@ jQuery(document).ready(function ($) {
         var has_atts = jQuery('[name="agsg_has_atts"]');
         var err = false;
 
+        if (serializedMatchData === 0) {
+            alert('After attributes have been mapped and you delete one you must re-map them to ensure nothing goes wrong during generating.');
+            err = true;
+        }
+
         if (shortcode_tag_name.val() === '') {
             jQuery(shortcode_tag_name).parent().parent().addClass('form-invalid');
             jQuery(shortcode_tag_name).parent().find('.error').remove();
@@ -401,15 +413,6 @@ jQuery(document).ready(function ($) {
 
         // no errors
         if (!err) {
-            var kind = '';
-            // set kind of shortcode
-            if (has_atts == 'Yes') {
-                kind = 'ATT';
-            }
-            else {
-                kind = 'NonATT';
-            }
-
             // set type of shortcode
             var type = 'enclosed';
             // let's disable the inputs for the duration of the ajax request
@@ -418,7 +421,7 @@ jQuery(document).ready(function ($) {
             request = jQuery.ajax({
                 url: page,
                 type: "post",
-                data: { kind: kind, type: type, form_info: serializedData, matched_attributes: serializedMatchData }
+                data: { type: type, form_info: serializedData, matched_attributes: serializedMatchData }
             });
 
             // callback handler that will be called on success

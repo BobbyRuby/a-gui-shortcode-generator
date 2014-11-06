@@ -10,12 +10,20 @@ abstract class agsgShortcodeGenerator
 {
     public $shortcode;
 
-    /**
-     * Calls the factory method
-     * @param string $type - enclosed of self-closed
-     * @param string $htmlTag - Wrapper tag for content should pass only text in b/w "<>" tags.
-     * @param string $atts - attributes of shortcode
-     * @param string $tag - the shortcode tag to use the shortcode ( the [shortcode] )
+    /** @todo - Fix this doc block
+     * Create Shortcode Needed arguments - Create Shortcode is called by generateShortcode
+     * @param string $type - enclosed or self-closed-
+     * @param string $tag - the shortcode string excluding the "[]" to invoke the shortcode function-
+     * @param string $description - A short description of the shortcode-
+     * @param string $allowsShortcodes - Whether or not this shortcode will permit other shortcodes to be wrapped in it. ('Yes' or 'No')-
+     * @param string $htmlTag - the tag the enclosed shortcodes will wrap their content with.-
+     * @param string $id - the id of the html tag.-
+     * @param string $class - class or classes of the html tag.-
+     * @param string $inlineStyle - inline styles for the shortcode.-
+     * @param array $html_atts - Multideminsional array containing html attribute names and static values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
+     * @param array $atts - Multideminsional array containing shortcode attribute names and default values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
+     * @param array $mapped_atts - Multideminsional array containing html tag and shortcode attribute names that have been matched up or 'mapped' - array( 'match_html_att_names' => array( name0, name1, name2 ) , 'match_shortcode_att_names' => array( 'value0', value1', value2'  ) );
+     * @return mixed
      */
     public function generateShortcode($args)
     {
@@ -28,10 +36,12 @@ abstract class agsgShortcodeGenerator
         $id = $args['id'];
         $class = $args['class'];
         $inlineStyle = $args['inline_styles'];
+        $html_atts = $args['html_atts'];
         $atts = $args['atts'];
-        $defaults = $args['defaults'];
+        $mapped_atts = $args['mapped_atts'];
+
         if (!$atts) $atts = array();
-        $this->shortcode = $this->createShortcode($type, trim($tag), trim($description), $allowsShortcodes, trim($htmlTag), trim($id), trim($class), trim($inlineStyle), $atts, $defaults);
+        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts);
         // access shortcode global 'exists' to see if we can create the file.
         if (!$this->shortcode->exists) {
             $this->addShortcodeToFile();
@@ -75,16 +85,34 @@ abstract class agsgShortcodeGenerator
     }
 
     /**
-     * Takes an HTML tag inner text and returns an indexed array containing the end tag and start tag
-     * @param $htmlTag - should only be the text inside the "<>" tags.  Example:  For a <section> you just pass 'section'
+     * Takes an HTML tag inner text and returns an indexed array containing the end tag and start tag.
+     * @param string $htmlTag - the tag the NonATT enclosed shortcodes will wrap their content with.
      * @return array - indexed array containing the end tag and start tag with classes and/or id
      */
-    protected function getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle)
+    protected function getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle, $html_atts)
     {
-        $stg = "<$htmlTag id='$id' class='$class' style='$inlineStyle'>";
+        $stg = "<$htmlTag id='$id' class='$class' style='$inlineStyle' ";
+        for ($i = 0; $i < count($html_atts['names']); $i++) {
+            $stg .= $html_atts['names'][$i] . '="' . $html_atts['values'][$i] . '" ';
+        }
+        $stg .= '>';
         $etg = "</$htmlTag>";
         return array($stg, $etg);
     }
 
-    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $atts, $defaults); // the factory method to be implemented by concrete creator classes
+    /**
+     * @param string $type - enclosed or self-closed
+     * @param string $tag - the shortcode string excluding the "[]" to invoke the shortcode function
+     * @param string $description - A short description of the shortcode
+     * @param string $allowsShortcodes - Whether or not this shortcode will permit other shortcodes to be wrapped in it. ('Yes' or 'No')
+     * @param string $htmlTag - the tag the enclosed shortcodes will wrap their content with.
+     * @param string $id - the id of the html tag.
+     * @param string $class - class or classes of the html tag.
+     * @param string $inlineStyle - inline styles for the shortcode.
+     * @param array $html_atts - Multideminsional array containing html attribute names and static values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
+     * @param array $atts - Multideminsional array containing shortcode attribute names and default values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
+     * @param array $mapped_atts - Multideminsional array containing html tag and shortcode attribute names that have been matched up or 'mapped' - array( 'match_html_att_names' => array( name0, name1, name2 ) , 'match_shortcode_att_names' => array( 'value0', value1', value2'  ) );
+     * @return mixed
+     */
+    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts); // the factory method to be implemented by concrete creator classes
 }

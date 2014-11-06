@@ -27,24 +27,18 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
 
 } else { // data in $_POST
-//    define( 'SHORTINIT', true ); // tried SHORTINIT but got failure notices
-    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :(
+//    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
+    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
     include_once('class-agsgShortcodeGenerator.php');
     include_once('class-agsgShortcode.php');
     include_once('agsg-concrete-creator-classes.php');
     include_once('agsg-concrete-product-classes.php');
     include_once('class-agsgNotices.php');
-    /**
-     * @param string $kind - used to determine what kind of shortcode were going to created. NonATT or ATT
-     * @param string $type - used by createShortcode factory method in concrete creator classes to decide what type of shortcode is going to be created. enclosed or self-closed
-     * @param string $htmlTag - used by concrete product classes to wrap content
-     * @param array $att - used by concrete product classes for attributes
-     * @param string $tag - used by concrete product classes to set the tag for the generated shortcode
-     */
+
     // grab serialized data
     parse_str($_POST['form_info'], $inputs);
     parse_str($_POST['matched_attributes'], $matched_atts);
-    rfd_debugger($matched_atts, 1);
+
     $args['type'] = $_POST['type'];
     $args['tag'] = $inputs['agsg_shortcode_tag_name'];
     $args['description'] = $inputs['agsg_description'];
@@ -54,19 +48,21 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     $args['class'] = $inputs['agsg_class'];
     $args['inline_styles'] = $inputs['agsg_inline_styles'];
 
-    // grab arrays to call our function
-    $args['agsg_html_tag_att_name'] = $inputs['agsg_atts'];
-    $args['atts'] = $inputs['agsg_atts'];
-    $args['html_tag_defaults'] = $inputs['agsg_defaults'];
+    $args['html_atts']['names'] = $inputs['agsg_html_tag_att_name'];
+    $args['html_atts']['values'] = $inputs['agsg_html_tag_default'];
+    $args['atts']['names'] = $inputs['agsg_att_name'];
+    $args['atts']['values'] = $inputs['agsg_default'];
+    $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
+    $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_html_tag_att_name'];
 
-    if ($_POST['kind'] === 'ATT') {
-//        $shortcode = new agsgATTgenerator();
-//        $shortcode->generateShortcode($args);
-    } else if ($_POST['kind'] === 'NonATT') {
-        $inputs['agsg_atts'] = array();
-        $inputs['agsg_defaults'] = array();
+    // get kind
+    $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
 
-        $shortcode = new agsgNonATTgenerator();
+    if ($kind === 'ATT') {
+        $shortcode = new agsgATTgenerator();
+        $shortcode->generateShortcode($args);
+    } else if ($kind === 'NonATT') {
+        $shortcode = new agsgNonATTgenerator(); // may still have html attributes
         $shortcode->generateShortcode($args);
 //            $msg = new agsgNotices('Test.', 'updated');
     } else {

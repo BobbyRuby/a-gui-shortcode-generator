@@ -9,25 +9,20 @@
  * Class agsgATTgenerator
  * Decides which type (enclosed OR self-closed) of attributed (ATT) shortcodes to create.
  */
-//class agsgATTgenerator extends agsgShortcodeGenerator
-//{
-//    public function createShortcode($type, $htmlTag, $name, $id, $class, $inlineStyle, $atts, $defaults, $tag)
-//    {
-//        $htmlTag = $this->getHtmlStartEndTag($htmlTag);
-//        $stg = $htmlTag[0];
-//        $etg = $htmlTag[1];
-//        $this->shortcode->type = $type;
-//        $this->shortcode->kind = 'ATT';
-//        if ($type == 'enclosed') {
-//            $shortcode = new agsgATTenclosed($stg, $etg, $id, $class, $atts, $defaults, $tag);
-//        } else if ($type == 'self-closed') {
+class agsgATTgenerator extends agsgShortcodeGenerator
+{
+    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts)
+    {
+        if ($type == 'enclosed') {
+            $shortcode = new agsgATTenclosed($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts);
+        } else if ($type == 'self-closed') {
 //            $shortcode = new agsgATTselfclosed($htmlTag, $atts, $tag);
-//        } else {
-//            $shortcode = null;
-//        }
-//        return $shortcode;
-//    }
-//}
+        } else {
+            $shortcode = null;
+        }
+        return $shortcode;
+    }
+}
 
 /**
  * Class agsgNonATTgenerator
@@ -36,18 +31,17 @@
  */
 class agsgNonATTgenerator extends agsgShortcodeGenerator
 {
-    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $atts, $defaults)
+    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts)
     {
         // check the type
         if ($type == 'enclosed') {
             // get our open and close tags since were are going to wrap something rather than replace the shortcode and add in our classes/ids/inlineStyles while were at it
-            $htmlTag = $this->getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle);
+            $htmlTag = $this->getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle, $html_atts);
             $htmlstg = $htmlTag[0];
             $htmletg = $htmlTag[1];
             $shortcode = new agsgNonATTenclosed($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class);
         } else if ($type == 'self-closed') {
 //            $shortcode = new agsgNonATTselfclosed($htmlTag, $atts, $tag);
-//            $shortcode->kind = 'ATT';
         } else {
             $shortcode = null;
         }

@@ -20,6 +20,8 @@ abstract class agsgShortcode
     public $description;
     public $exists;
     public $filename;
+    public $htmlTagOR; // bool
+    public $mapped_atts; // contains all attributes for this shortcode
     public $error;
 
     public function logShortcodeToDatabase()
