@@ -53,7 +53,7 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     $args['atts']['names'] = $inputs['agsg_att_name'];
     $args['atts']['values'] = $inputs['agsg_default'];
     $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
-    $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_html_tag_att_name'];
+    $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
 
     // get kind
     $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
@@ -160,6 +160,7 @@ class agsgPlugin
           htmletg VARCHAR(20) NOT NULL,
           description VARCHAR(300) NOT NULL,
           example VARCHAR(300) NOT NULL,
+          code TEXT NOT NULL,
           created_datetime DATETIME NOT NULL,
           CONSTRAINT $table_name" . "_pk PRIMARY KEY (id)
         ) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;";

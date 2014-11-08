@@ -104,15 +104,10 @@ jQuery(document).ready(function ($) {
         return false;
     });
 
-    /***** Custom settings for pages - Concrete Javscript *****/
-
+    /***** Custom settings for pages ****/
     var htmlTagATTList = []; // holds our html attributes
     var shortcodeTagATTList = []; // holds our shortcode attributes
     var serializedMatchData;
-    /**
-     * These two arrays will be aligned perfectly with each index matching one another on the post.
-     */
-
 
         // prevent attribute_matching_form submit
     jQuery("#attribute_matching_form").submit(function (event) {
@@ -216,7 +211,8 @@ jQuery(document).ready(function ($) {
                 '<label for="html_tag_att_name"><span class="description">This is the name for the HTML TAG attribute.<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this attribute and the static vaule associated with it."></span></span></label>' +
                 '</td></tr>';
             html += '<tr class="html_tag_template_value"><th scope="row">HTML TAG Attribute 1 Set Value</th><td><input type="text" value="" placeholder="" name="agsg_html_tag_default[]" id="html_tag_default">' +
-                '<label for="html_tag_default"><span class="description">The SET value for the attribute.  If you want to match the HTML TAG attribute name with a shortcode attribute value, leave this blank.  If you intend on this HTML TAG attribute value staying the same each time this shortcode is used, then fill this in.</span></label>' +
+                '<label for="html_tag_default"><span class="description">The SET value for the attribute.<br/>  ' +
+                '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> If you want to match this HTML TAG attribute name with a shortcode attribute, leave this blank and put the default value in the shortcode attributes "Default Value" field. Then map them using the link that becomes visible when you\'ve answered both questions </span></label>' +
                 '</td></tr>';
             jQuery(this).parent().parent().parent().after(html);
             jQuery('[for="html_tag_att_name"] .dashicons-dismiss').click(function (e) {
@@ -367,10 +363,10 @@ jQuery(document).ready(function ($) {
     var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
     var page = dir + 'class-agsgPlugin.php';
     /**
-     * ncagsg page form
+     * eagsg page form
      */
     var request = '';
-    jQuery("#agsg_ncagsg_form").submit(function (event) {
+    jQuery("#agsg_eagsg_form").submit(function (event) {
         // abort any pending request
         if (request) {
             request.abort();
@@ -449,8 +445,4 @@ jQuery(document).ready(function ($) {
         // prevent default posting of form
         event.preventDefault();
     });
-    /**
-     * ATT kinds
-     */
-    var kind = 'NonATT';
 });

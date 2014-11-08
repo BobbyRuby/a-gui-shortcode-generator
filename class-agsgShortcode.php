@@ -8,7 +8,7 @@
  */
 abstract class agsgShortcode
 {
-    public $shortcode;
+    public $shortcode_code;
     public $dbid;
     public $type;
     public $name;
@@ -20,8 +20,10 @@ abstract class agsgShortcode
     public $description;
     public $exists;
     public $filename;
+    public $html_id_OR; // bool
     public $htmlTagOR; // bool
-    public $mapped_atts; // contains all attributes for this shortcode
+    public $shortcodes_atts_str; // contains all attributes for this shortcode
+    public $shortcode_atts; // contains all attributes for this shortcode
     public $error;
 
     public function logShortcodeToDatabase()
@@ -31,14 +33,18 @@ abstract class agsgShortcode
         $wpdb->insert($table,
             array( // columns
                 'type' => $this->type,
+                'name' => $this->name,
                 'kind' => $this->kind,
                 'tag' => $this->tag,
                 'htmlstg' => $this->htmlstg,
                 'htmletg' => $this->htmletg,
-                'example' => $this->example,
                 'description' => $this->description,
+                'example' => $this->example,
+                'code' => $this->shortcode_code,
             ),
             array( // formats
+                '%s',
+                '%s',
                 '%s',
                 '%s',
                 '%s',
@@ -50,24 +56,7 @@ abstract class agsgShortcode
         );
         // set the dbid
         $this->dbid = $wpdb->insert_id;
-        if (!$wpdb->last_error) {
-            // Set name of shortcode and its function
-            $this->name = $this->tag . '_agsgShortcode_' . $wpdb->insert_id; // use the tag name for the function
-            $wpdb->update($table,
-                array( // columns
-                    'name' => $this->name
-                ),
-                array( // wheres
-                    'id' => $wpdb->insert_id
-                ),
-                array( // formats
-                    '%s'
-                ),
-                array( // where formats
-                    '%d'
-                )
-            );
-        } else {
+        if ($wpdb->last_error) {
             $this->error = $wpdb->last_error;
         }
     }

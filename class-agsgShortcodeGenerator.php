@@ -55,10 +55,10 @@ abstract class agsgShortcodeGenerator
     private function print_shortcode_data()
     {
         $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you just created with AGSG</h3>';
-        $html .= '<strong>File the code for this shortcode was added to:</strong><br/>
+        $html .= '<strong>The code for this shortcode was added to file located at:</strong><br/>
         <i>"' . $this->shortcode->filename . '"</i><br/>';
         $html .= '<h4>The code generated and added to the file above by AGSG...</h4>
-        <textarea readonly="readonly">' . $this->shortcode->shortcode . '</textarea>';
+        <textarea readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
         $html .= '<h4>An Example of how to use the shortcode you created...</h4>
         <i>"' . $this->shortcode->example . '"</i><br/>';
         echo $html;
@@ -72,7 +72,7 @@ abstract class agsgShortcodeGenerator
         $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
         $this->shortcode->filename = $fileName;
         if ($fh = fopen($fileName, 'a')) { // open file agsg for appending if true so we can append our shortcode
-            fwrite($fh, PHP_EOL . $this->shortcode->shortcode . PHP_EOL);
+            fwrite($fh, PHP_EOL . $this->shortcode->shortcode_code . PHP_EOL);
         }
         fclose($fh);
     }
