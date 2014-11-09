@@ -21,7 +21,7 @@ span.error {
 
 #map_attributes {
     display: none;
-    background: none repeat scroll 0 0 #111111;
+    background: none repeat scroll 0 0 #222;
     box-shadow: -1px 0 1px #000;
     color: white;
     padding: 10px 15px 15px 10px;
@@ -46,7 +46,7 @@ span.error {
 }
 
 #add_shortcode_att:hover, #add_html_tag_att:hover, #add_shortcode_condition:hover {
-    background: none repeat scroll 0 0 #333333;
+    background: none repeat scroll 0 0 #333;
     color: #2ea2cc;
     cursor: pointer;
     zoom: 0;
@@ -77,4 +77,23 @@ span.error {
 
 .important {
     font-weight: bold;
+}
+
+.reset_condition_container {
+    background: none repeat scroll 0 0 #222;
+    border: 1px solid #3e3e3e;
+    border-radius: 5px;
+    color: #0074a2;
+    padding: 2px 2px 2px 5px;
+    width: 130px;
+}
+
+.reset_condition_container:hover {
+    background: none repeat scroll 0 0 #111;
+    color: white;
+    cursor: pointer;
+}
+
+.reset_condition {
+    font-size: 12px;
 }
