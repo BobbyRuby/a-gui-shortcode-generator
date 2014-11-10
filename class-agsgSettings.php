@@ -713,7 +713,7 @@ class agsgSettings
                     <?php
                     settings_fields($page['slug']);
                     do_settings_sections($page['slug']);
-                    wp_editor('', 'test', $settings = array());
+                    //                    wp_editor('', 'test', $settings = array());
                     ?>
                 </div>
                 <?php

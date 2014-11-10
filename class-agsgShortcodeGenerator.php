@@ -39,6 +39,7 @@ abstract class agsgShortcodeGenerator
         $html_atts = $args['html_atts'];
         $atts = $args['atts'];
         $mapped_atts = $args['mapped_atts'];
+        $tinyMCE = $args['tinyMCE'];
 
         if (!$atts) $atts = array();
         $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts);

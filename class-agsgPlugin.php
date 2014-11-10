@@ -55,6 +55,10 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
     $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
 
+    // for conditions
+    $args['tinyMCE'] = $_POST['tinyMCE'];
+    rfd_debugger($inputs, 1);
+
     // get kind
     $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
 
