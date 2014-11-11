@@ -14,8 +14,8 @@ class agsgATTenclosed extends agsgShortcode
 {
     public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
-        if (!$this->tagExists($tag)) {
-            $this->name = $tag . '_agsg';
+
+        $this->name = $tag . '_agsg';
             // Set up some local variables
             $att_names = $atts['names'];
             $att_values = $atts['values'];
@@ -86,6 +86,7 @@ STRING;
 
             // create function
             $this->shortcode_code = <<<STRING
+//$tag
 function $this->name (
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
@@ -186,7 +187,9 @@ VARSTR;
 
 }
 add_shortcode( '$tag', '$this->name' );
+//$tag
 STRING;
+        if (!$this->tagExists($tag)) {
             // log the shortcode to the db
             $this->logShortcodeToDatabase();
         }
@@ -235,7 +238,6 @@ class agsgNonATTenclosed extends agsgShortcode
 {
     public function __construct($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class)
     {
-        if (!$this->tagExists($tag)) {
             // set some info we want to store or use
             $this->name = $tag . '_agsg';
             $this->kind = 'NonATT';
@@ -247,6 +249,7 @@ class agsgNonATTenclosed extends agsgShortcode
             $this->example = $this->generateExample(); // $this->tag is set and ready to use so no need to use $tag
 
             $this->shortcode_code = <<<EOD
+//$tag
 function $this->name
 EOD;
             $this->shortcode_code .= <<<'EOD'
@@ -271,7 +274,9 @@ EOD;
 $htmletg";
 }
 add_shortcode( '$tag', '$this->name' );
+//$tag
 EOD;
+        if (!$this->tagExists($tag)) {
             // log the shortcode to the db
             $this->logShortcodeToDatabase();
         }

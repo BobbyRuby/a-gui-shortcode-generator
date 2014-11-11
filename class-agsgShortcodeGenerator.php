@@ -33,7 +33,7 @@ abstract class agsgShortcodeGenerator
             $this->addShortcodeToFile();
             $this->print_shortcode_data();
         } else {
-            $this->print_error_data();
+            $this->print_error_data('exists');
         }
 
     }
@@ -63,11 +63,28 @@ abstract class agsgShortcodeGenerator
         fclose($fh);
     }
 
-    private function print_error_data()
+    private function print_error_data($err_type)
     {
-        $html = '<h3>Something went horribly wrong!</h3>';
-        $html .= $this->shortcode->error;
+        global $wpdb;
+        $html = '<h3>' . $this->shortcode->error . '</h3>';
+        if ($err_type === 'exists') {
+            // get old shortcode for quick comparison
+            $table = $wpdb->prefix . 'agsg_shortcodes';
+            $sql = $wpdb->prepare(
+                'SELECT code FROM ' . $table . ' WHERE tag = %s',
+                $this->shortcode->tag
+            );
+            $oldshortcode_code = $wpdb->get_var($sql);
+            $html .= '<h4><label for="old_shortcode">Old Shortcode</label></h4><textarea id="old_shortcode" readonly="readonly">' . $oldshortcode_code . '</textarea>';
+            $html .= '<h4><label for="new_shortcode">Preview of Replacement Shortcode if Regenerated</label></h4><textarea id="new_shortcode" readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
+            $html .= $this->getOverwriteShortcodeButton();
+        }
         echo $html;
+    }
+
+    private function getOverwriteShortcodeButton()
+    {
+        return '<input type="submit" value="Delete old code and Regenerate Shortcode to above Specifications" class="button-primary" name="submit_agsg_regen">';
     }
 
     /**

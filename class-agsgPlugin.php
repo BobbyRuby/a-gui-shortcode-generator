@@ -7,17 +7,6 @@ Version: 0.0.1
 Author: Bobby Ruby
 Author URI:
 */
-
-function rfd_debugger($debugItem, $die = 0)
-{
-    echo '<pre>';
-    print_r($debugItem);
-    echo '</pre>';
-    if ($die == 1) {
-        die();
-    }
-}
-
 // if not accessed by a post from this form
 if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     // make sure it wasn't accessed directly
@@ -25,8 +14,13 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     register_activation_hook(__FILE__, array('agsgPlugin', 'install')); // install plugin on activation
     add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
     add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
-
-} else { // data in $_POST
+} else if (isset($_POST['shortcode_rewrite'])) {
+    $tag = $_POST['shortcode_rewrite']['tag'];
+    $code = $_POST['shortcode_rewrite']['code'];
+    agsgPlugin::deleteShortcode($tag);
+    agsgPlugin::addShortcodeToFile($code);
+    exit;
+} else if ($_POST['form_info']) {
 //    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
     require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
     include_once('class-agsgShortcodeGenerator.php');
@@ -72,16 +66,14 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
         $shortcode = new agsgATTgenerator();
         $shortcode->generateShortcode($args);
     } else if ($kind === 'NonATT') {
-        $shortcode = new agsgNonATTgenerator(); // may still have html attributes
+        $shortcode = new agsgNonATTgenerator();
         $shortcode->generateShortcode($args);
-//            $msg = new agsgNotices('Test.', 'updated');
     } else {
     }
     exit;
 }
 
 include_once('agsg_shortcodes.php');
-// Added 11/2/14
 include_once('class-agsgSettings.php');
 
 
@@ -96,53 +88,24 @@ class agsgPlugin
 
     private function __construct()
     {
-        add_action('current_screen', array(&$this, 'showHooks'), 10); // show hooks
         $settings = new agsgSettings(__FILE__);
     }
 
-    public function showHooks()
+    public static function addShortcodeToFile($shortcode_code)
     {
-        global $current_screen;
-        $screen = $current_screen;
-        global $hook_suffix;
-        $screen_id = $screen->id;
-        // List screen properties
-        $variables = '<ul style="width:50%;float:left;"> <strong>Screen variables </strong>'
-            . sprintf('<li> Screen id : %s</li>', $screen_id)
-            . sprintf('<li> Screen base : %s</li>', $screen->base)
-            . sprintf('<li>Parent base : %s</li>', $screen->parent_base)
-            . sprintf('<li> Parent file : %s</li>', $screen->parent_file)
-            . sprintf('<li> Hook suffix : %s</li>', $hook_suffix)
-            . '</ul>';
+        $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
+        if ($fh = fopen($fileName, 'a')) { // open file agsg for appending if true so we can append our shortcode
+            fwrite($fh, PHP_EOL . $shortcode_code . PHP_EOL);
+        }
+        fclose($fh);
+    }
 
-        // Append global $hook_suffix to the hook stems
-        $hooks = array(
-            "load-$hook_suffix",
-            "admin_print_styles-$hook_suffix",
-            "admin_print_scripts-$hook_suffix",
-            "admin_head-$hook_suffix",
-            "admin_footer-$hook_suffix"
-        );
-
-        // If add_meta_boxes or add_meta_boxes_{screen_id} is used, list these too
-        if (did_action('add_meta_boxes_' . $screen_id))
-            $hooks[] = 'add_meta_boxes_' . $screen_id;
-
-        if (did_action('add_meta_boxes'))
-            $hooks[] = 'add_meta_boxes';
-
-        // Get List HTML for the hooks
-        $hooks = '<ul style="width:50%;float:left;"> <strong>Hooks </strong> <li>' . implode('</li><li>', $hooks) . '</li></ul>';
-
-        // Combine $variables list with $hooks list.
-        $help_content = $variables . $hooks;
-
-        // Add help panel
-        $screen->add_help_tab(array(
-            'id' => 'wptuts-screen-help',
-            'title' => 'Screen Information',
-            'content' => $help_content,
-        ));
+    public static function deleteShortcode($tag)
+    {
+        $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
+        $source_file = file_get_contents($fileName);
+        $source = preg_replace('/(\/\/' . $tag . ')(.*)(\/\/' . $tag . ')/s', "", $source_file);
+        file_put_contents($fileName, $source);
     }
 
     public static function getInstance()
@@ -183,9 +146,61 @@ class agsgPlugin
         if (is_admin() && get_option('agsgPlugin') == 'agsg') {
             delete_option('agsg');
             /* do some stuff once right after activation */
-
-
-            // maybe redirect to another page? display custom notices?
         }
     }
 }
+
+// Other functions for debugging - Uncomment when/if needed
+function rfd_debugger($debugItem, $die = 0)
+{
+    echo '<pre>';
+    print_r($debugItem);
+    echo '</pre>';
+    if ($die == 1) {
+        die();
+    }
+}
+//function showHooks()
+//{
+//    global $current_screen;
+//    $screen = $current_screen;
+//    global $hook_suffix;
+//    $screen_id = $screen->id;
+//    // List screen properties
+//    $variables = '<ul style="width:50%;float:left;"> <strong>Screen variables </strong>'
+//        . sprintf('<li> Screen id : %s</li>', $screen_id)
+//        . sprintf('<li> Screen base : %s</li>', $screen->base)
+//        . sprintf('<li>Parent base : %s</li>', $screen->parent_base)
+//        . sprintf('<li> Parent file : %s</li>', $screen->parent_file)
+//        . sprintf('<li> Hook suffix : %s</li>', $hook_suffix)
+//        . '</ul>';
+//
+//    // Append global $hook_suffix to the hook stems
+//    $hooks = array(
+//        "load-$hook_suffix",
+//        "admin_print_styles-$hook_suffix",
+//        "admin_print_scripts-$hook_suffix",
+//        "admin_head-$hook_suffix",
+//        "admin_footer-$hook_suffix"
+//    );
+//
+//    // If add_meta_boxes or add_meta_boxes_{screen_id} is used, list these too
+//    if (did_action('add_meta_boxes_' . $screen_id))
+//        $hooks[] = 'add_meta_boxes_' . $screen_id;
+//
+//    if (did_action('add_meta_boxes'))
+//        $hooks[] = 'add_meta_boxes';
+//
+//    // Get List HTML for the hooks
+//    $hooks = '<ul style="width:50%;float:left;"> <strong>Hooks </strong> <li>' . implode('</li><li>', $hooks) . '</li></ul>';
+//
+//    // Combine $variables list with $hooks list.
+//    $help_content = $variables . $hooks;
+//
+//    // Add help panel
+//    $screen->add_help_tab(array(
+//        'id' => 'wptuts-screen-help',
+//        'title' => 'Screen Information',
+//        'content' => $help_content,
+//    ));
+//}

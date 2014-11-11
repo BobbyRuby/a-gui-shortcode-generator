@@ -235,7 +235,7 @@ class agsgSettings
                         array(
                             'id' => 'shortcode_tag_name',
                             'label' => __('Shortcode Tag Name', 'plugin_textdomain'),
-                            'description' => __('The shortcode tag name used to invoke the shorcode function without the "[" or "]".<br/>
+                            'description' => __('The shortcode tag name used to invoke the shortcode function without the "[" or "]".<br/>
                             Example Input:  my_shortcode<br/>
                              <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> This will also be the name of your shortcode function generated along with the "id" of the database row this shortcode occupy\'s', 'plugin_textdomain'),
                             'type' => 'text',
@@ -354,7 +354,7 @@ class agsgSettings
                         array(
                             'id' => 'shortcode_tag_name',
                             'label' => __('Shortcode Tag', 'plugin_textdomain'),
-                            'description' => __('The tag used to invoke the shorcode function without the "[" or "]".<br/>
+                            'description' => __('The tag used to invoke the shortcode function without the "[" or "]".<br/>
                             Example Input:  my_shortcode<br/>
                              <span class="dashicons dashicons-welcome-write-blog"></span>Important Note: this will also be the name of your shortcode function generated along with the "id" of the database row this shortcode occupy\'s', 'plugin_textdomain'),
                             'type' => 'text',
