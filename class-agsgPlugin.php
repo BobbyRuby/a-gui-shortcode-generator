@@ -55,10 +55,16 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
     $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
 
-    // for conditions
-    $args['tinyMCE'] = $_POST['tinyMCE'];
-    rfd_debugger($inputs, 1);
-
+    // grab all conditions on the screen and create an array for each one that contains only the data for it if conditions exist
+    if ($inputs['agsg_has_conditions'] === 'Yes') {
+        for ($i = 0; $i < count($inputs['agsg_shortcode_condition_type']); $i++) {
+            $args['conditions'][$i]['type'] = $inputs['agsg_shortcode_condition_type'][$i];
+            $args['conditions'][$i]['attribute'] = $inputs['agsg_shortcode_condition_attribute'][$i];
+            $args['conditions'][$i]['operator'] = $inputs['agsg_shortcode_condition_operator'][$i];
+            $args['conditions'][$i]['value'] = $inputs['agsg_shortcode_condition_value'][$i];
+            $args['conditions'][$i]['tinyMCE'] = $inputs['agsg_shortcode_condition_tinyMCE'][$i];
+        }
+    }
     // get kind
     $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
 

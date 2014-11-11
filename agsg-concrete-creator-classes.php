@@ -11,10 +11,10 @@
  */
 class agsgATTgenerator extends agsgShortcodeGenerator
 {
-    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts)
+    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
         if ($type == 'enclosed') {
-            $shortcode = new agsgATTenclosed($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts);
+            $shortcode = new agsgATTenclosed($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions);
         } else if ($type == 'self-closed') {
 //            $shortcode = new agsgATTselfclosed($htmlTag, $atts, $tag);
         } else {
@@ -31,7 +31,7 @@ class agsgATTgenerator extends agsgShortcodeGenerator
  */
 class agsgNonATTgenerator extends agsgShortcodeGenerator
 {
-    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts)
+    public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
         // check the type
         if ($type == 'enclosed') {

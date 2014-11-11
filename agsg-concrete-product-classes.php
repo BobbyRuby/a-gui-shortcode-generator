@@ -12,21 +12,7 @@
  */
 class agsgATTenclosed extends agsgShortcode
 {
-    /**
-     * @param string $type - enclosed or self-closed-
-     * @param string $tag - the shortcode string excluding the "[]" to invoke the shortcode function-
-     * @param string $description - A short description of the shortcode-
-     * @param string $allowsShortcodes - Whether or not this shortcode will permit other shortcodes to be wrapped in it. ('Yes' or 'No')-
-     * @param string $htmlTag - the tag the enclosed shortcodes will wrap their content with.- no "<>"
-     * @param string $id - the id of the html tag.-
-     * @param string $class - class or classes of the html tag.-
-     * @param string $inlineStyle - inline styles for the shortcode.-
-     * @param array $html_atts - Multideminsional array containing html attribute names and static values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
-     * @param array $atts - Multideminsional array containing shortcode attribute names and default values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
-     * @param array $mapped_atts - Multideminsional array containing html tag and shortcode attribute names that have been matched up or 'mapped' - array( 'match_html_att_names' => array( name0, name1, name2 ) , 'match_shortcode_att_names' => array( name0, name1, name2 )  );
-     * @return mixed
-     */
-    public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts)
+    public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
         if (!$this->tagExists($tag)) {
             $this->name = $tag . '_agsg';
@@ -97,29 +83,34 @@ STRING;
             }
             // generate a typical use example
             $this->example = $this->generateExample($this->shortcode_atts); // $this->tag is set and ready to use so no need to use $tag $this->mapped_atts is set as well
+
+            // create function
             $this->shortcode_code = <<<STRING
 function $this->name (
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
  $atts, $content = null ) {
+
 VARSTR;
             $this->shortcode_code .= <<<'VARSTR'
-    $a = shortcode_atts(
+$a = shortcode_atts(
 VARSTR;
             $this->shortcode_code .= <<<STRING
  $this->shortcodes_atts_str,
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
-  $atts );
+ $atts );
+
+ $var =
 VARSTR;
             // is their an override for the html tag
             if ($this->htmlTagOR) {
                 $this->shortcode_code .= <<<'VARSTR'
-  return '<'.$a['html_tag'].
+'<'.$a['html_tag'].
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
-    return '<$htmlTag'.
+    '<$htmlTag'.
 STRING;
             }
             // is their an override for the id
@@ -157,21 +148,45 @@ STRING;
 STRING;
             // check if shortcodes are allowed to be embedded in this shortcode
             if ($allowsShortcodes === 'No') {
-                $this->shortcode_code .= <<<'EOD'
+                $this->shortcode_code .= <<<'VARSTR'
 >'.$content
-EOD;
+VARSTR;
             } else { // allowed
-                $this->shortcode_code .= <<<'EOD'
+                $this->shortcode_code .= <<<'VARSTR'
 >'.do_shortcode($content)
-EOD;
-
+VARSTR;
             }
             $this->shortcode_code .= <<<EOD
 .'</$htmlTag>';
+EOD;
+
+            if (count($conditions)) {
+                foreach ($conditions as $condition) {
+                    $type = $condition["type"];
+                    $operator = $condition["operator"];
+                    $attribute = '$a[\'' . $condition["attribute"] . '\']';
+                    $value = $condition["value"];
+                    if (!$value) $value = '\'\'';
+                    $tinyMCE = $condition["tinyMCE"];
+                    $this->shortcode_code .= <<<STRING
+
+                $type ( $attribute $operator $value ){
+                    echo '$tinyMCE';
+                }
+STRING;
+                }
+            }
+            $this->shortcode_code .= <<<'VARSTR'
+if($content){
+return $var;
+}
+VARSTR;
+            $this->shortcode_code .= <<<STRING
+
 }
 add_shortcode( '$tag', '$this->name' );
-EOD;
-            // log the shortcode to the db and set its name
+STRING;
+            // log the shortcode to the db
             $this->logShortcodeToDatabase();
         }
     }

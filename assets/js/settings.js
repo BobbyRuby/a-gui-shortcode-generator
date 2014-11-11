@@ -218,7 +218,7 @@ jQuery(document).ready(function ($) {
         if (val == 'Yes') {
             conditionList.push('shortcode_condition_type');
             var html = '<tr class="type_template"><th scope="row">Select IF</th><td><select id="shortcode_condition_type" name="agsg_shortcode_condition_type[]"><option value="select">Select IF</option><option value="if">IF</option></select> ' +
-                '<label for="shortcode_condition_type"><span class="description"><br/>' +
+                '<label for="agsg_shortcode_condition_type[]"><span class="description"><br/>' +
                 '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Use "IF" to do something when an attribute(s) evaluation is "TRUE".<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this condition and the data associated with it."></span><br/>' +
                 '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span> TinyMCE will not load TWICE for a condition. What this means is once you remove a condition, if you add it again, you will no longer have the editor so you must create conditions until you have passed the id number of the condition you deleted, then delete the conditions without TinyMCE unless you want to use HTML markup.<br/>' +
                 '</span><br/>' +
@@ -258,35 +258,38 @@ jQuery(document).ready(function ($) {
                 else if (val == 'if') {
                     loadTiny = true;
                     // attribute to evaluate
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Evaluate Attribute</th><td><select class="shortcode_condition_attribute" name="agsg_shortcode_condition_' + condition_id_num + '_attribute">';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Evaluate Attribute</th><td><select id="shortcode_condition_' + condition_id_num + '_attribute" class="shortcode_condition_attribute" name="agsg_shortcode_condition_attribute[]">';
                     html += getShortcodeAttributeOptionsList();
-                    html += '</select><label for="shortcode_condition_attribute"><span class="description">This is the shortcode attribute you want to check the value of.</span></label>' +
+                    html += '</select><label for="shortcode_condition_' + condition_id_num + '_attribute"><span class="description">This is the shortcode attribute you want to check the value of.</span></label>' +
                         '<div id="reset_for_attribute_condition_number_' + condition_id_num + '" class="reset_condition_container"><span class="reset_condition">Reset these options</span><span class="dashicons dashicons-randomize"></span></div></td></tr>';
 
                     // operator type == / <= / >= / < / >
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Operator</th><td><select class="shortcode_condition_operator" name="agsg_shortcode_condition_' + condition_id_num + '_operator">';
-                    html += '<option value="==">equal to</option>' +
-                        '<option value="!=">not equal to</option>' +
-                        '<option value="<=">less than or equal to</option>' +
-                        '<option value="<">less than</option>' +
-                        '<option value=">=">greater than or equal to</option>' +
-                        '<option value=">">greater than</option>' +
-                        '</select><label for="shortcode_condition_operator"><span class="description">This is the operator to use in evaluating the shortcode attribute you want to check against the value you input in the text field below.</span></label>';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Operator</th><td><select id="shortcode_condition_' + condition_id_num + '_operator" class="shortcode_condition_operator" name="agsg_shortcode_condition_operator[]">';
+                    html += '<option value="==">equal to value</option>' +
+                        '<option value="!=">not equal to value</option>' +
+//                        '<option value="===">equal to value and type</option>' +
+//                        '<option value="!==">not equal to value or type</option>' +
+                        '<option value="<=">less than or equal to value</option>' +
+                        '<option value="<">less than value</option>' +
+                        '<option value=">=">greater than or equal to value</option>' +
+                        '<option value=">">greater than value</option>' +
+                        '</select><label for="shortcode_condition_' + condition_id_num + '_operator"><span class="description">This is the operator to use in evaluating the shortcode attribute you want to check against the value you input in the text field below.</span></label>';
                     // value to check against
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Value</th><td><input class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_' + condition_id_num + '_value">' +
-                        '<label for="agsg_shortcode_condition_' + condition_id_num + '_value"><span class="description">This is the value the value to check the shortcode attribute against using the operator above.</span></label>' +
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Value</th><td><input id="shortcode_condition_' + condition_id_num + '_value"" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value[]">' +
+                        '<label for="shortcode_condition_' + condition_id_num + '_value"><span class="description">This is the value the value to check the shortcode attribute against using the operator above.<br/>' +
+                        '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
                         '</td></tr>';
                     // action to do if true
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Action if evaluation is true.</th><td><textarea name="agsg_tinyMCE_for_condition_number_' + condition_id_num + '" cols="50" rows="5" id="tinyMCE_for_condition_number_' + condition_id_num + '">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">Enter data here</span></label></td></tr>';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Action if evaluation is true.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">Enter data here</span></label></td></tr>';
                     // push this id into the array
-                    tinyMCEids.push('tinyMCE_for_condition_number_' + condition_id_num);
+                    tinyMCEids.push('shortcode_condition_' + condition_id_num + '_tinyMCE');
 
                 }
                 jQuery(this).parent().parent().after(html);
-                if (loadTiny) loadTinyMCE('#tinyMCE_for_condition_number_' + condition_id_num, tinyMCEids); // load if needed
+                if (loadTiny) loadTinyMCE('#shortcode_condition_' + condition_id_num + '_tinyMCE', tinyMCEids); // load if needed
                 // set reset button
                 jQuery('#reset_for_attribute_condition_number_' + condition_id_num).click(function (e) {
-                    jQuery('[name="agsg_shortcode_condition_' + condition_id_num + '_attribute"]').html(getShortcodeAttributeOptionsList('reset'));
+                    jQuery('#shortcode_condition_' + condition_id_num + '_attribute').html(getShortcodeAttributeOptionsList('reset'));
                 });
             });
             jQuery('#add_shortcode_condition').show();
@@ -345,7 +348,7 @@ jQuery(document).ready(function ($) {
             jQuery(this).parent().parent().parent().after(html);
             jQuery('[for="html_tag_att_name"] .dashicons-dismiss').click(function (e) {
 //                if(jQuery('#has_atts_Yes').is(':checked')){
-                if (window.confirm("You will lose this HTML TAG attribute and must reset attribute mapping.. Continue?")) {
+                if (window.confirm("You will lose this HTML TAG attribute and must reset attribute mapping if set already. Continue?")) {
                     jQuery(this).parent().parent().parent().parent().next().remove();
                     jQuery(this).parent().parent().parent().parent().remove();
                     if (serializedMatchData.length) serializedMatchData = 0;
@@ -423,7 +426,7 @@ jQuery(document).ready(function ($) {
                 '</td></tr>';
             jQuery(this).parent().parent().parent().after(html);
             jQuery('[for="att_name"] .dashicons-dismiss').click(function (e) {
-                if (window.confirm("You will lose this attribute, you must reset attribute mapping, and if you were using this for a condition you need to delete is as well.  Continue?")) {
+                if (window.confirm("You will lose this attribute, you must reset attribute mapping if set already, and if you were using this for a condition you need to delete is as well.  Continue?")) {
                     if (serializedMatchData.length) serializedMatchData = 0;
                     jQuery(this).parent().parent().parent().parent().next().remove();
                     jQuery(this).parent().parent().parent().parent().remove();
@@ -553,7 +556,7 @@ jQuery(document).ready(function ($) {
             jQuery(shortcode_tag_name).parent().prepend('<span class="error">Must have a tag.</span>');
             err = true;
         } else {
-            jQuery(shortcode_tag_name).parent().removeClass('form-invalid').find('.error').remove();
+            jQuery(shortcode_tag_name).parent().parent().removeClass('form-invalid').find('.error').remove();
         }
 
         if (html_tag_name.val() === '') {
@@ -562,19 +565,17 @@ jQuery(document).ready(function ($) {
             jQuery(html_tag_name).parent().prepend('<span class="error">Must have a tag name.</span>');
             err = true;
         } else {
-            jQuery(html_tag_name).parent().removeClass('form-invalid').find('.error').remove();
+            jQuery(html_tag_name).parent().parent().removeClass('form-invalid').find('.error').remove();
         }
         // if conditions are present then make sure we have attributes present
-        if (jQuery('#has_conditions_Yes').is(':checked')) {
+        if (jQuery('#has_conditions_Yes').is(':checked') && jQuery('#has_atts_No').is(':checked')) {
             jQuery(has_atts).parent().parent().addClass('form-invalid');
             jQuery(has_atts).parent().find('.error').remove();
             jQuery('#has_atts_Yes').parent().prepend('<span class="error">Must have attributes to use the conditionals.</span>'); // added to only the yes to prevent duplicate msg
             err = true;
         } else {
-            jQuery(has_atts).parent().removeClass('form-invalid').find('.error').remove();
+            jQuery(has_atts).parent().parent().removeClass('form-invalid').find('.error').remove();
         }
-
-
         /**
          * End Validation Area
          */
@@ -647,17 +648,14 @@ function loadTinyMCE(selector, existing_ids) {
             window.tinymce.dom.Event.domLoaded = true;
             tinymce.init({
                 selector: "textarea" + selector,
-                plugins: ["advlist autolink lists link image charmap print preview anchor",
-                    "searchreplace visualblocks code fullscreen",
-                    "insertdatetime media table contextmenu paste"],
+                plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste emoticons paste textcolor colorpicker textpattern"],
+                toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+                toolbar2: "preview media | forecolor backcolor emoticons insertfile",
                 menubar: "tools table format view insert edit"
-//                statusbar: false,
-//                toolbar: false
             });
         });
     }
     else {
-        alert('what the fuck');
         // shutdown all current instances
         for (var i = 0; i < existing_ids.length; i++) {
             var id = '#' + existing_ids[i];
@@ -667,12 +665,10 @@ function loadTinyMCE(selector, existing_ids) {
         window.tinymce.dom.Event.domLoaded = true;
         tinymce.init({
             selector: "textarea" + selector,
-            plugins: ["advlist autolink lists link image charmap print preview anchor",
-                "searchreplace visualblocks code fullscreen",
-                "insertdatetime media table contextmenu paste"],
+            plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste emoticons paste textcolor colorpicker textpattern"],
+            toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+            toolbar2: "preview media | forecolor backcolor emoticons insertfile",
             menubar: "tools table format view insert edit"
-//                statusbar: false,
-//                toolbar: false
         });
         // restart all current instances
         for (var i = 0; i < existing_ids.length; i++) {
