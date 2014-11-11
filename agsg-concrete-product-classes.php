@@ -110,7 +110,7 @@ VARSTR;
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
-    '<$htmlTag'.
+'<$htmlTag'.
 STRING;
             }
             // is their an override for the id
@@ -177,9 +177,10 @@ STRING;
                 }
             }
             $this->shortcode_code .= <<<'VARSTR'
-if($content){
-return $var;
-}
+
+    if($content){
+        return $var;
+    }
 VARSTR;
             $this->shortcode_code .= <<<STRING
 

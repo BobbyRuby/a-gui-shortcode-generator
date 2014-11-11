@@ -41,7 +41,7 @@ abstract class agsgShortcodeGenerator
     private function print_shortcode_data()
     {
         $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you just created with AGSG</h3>';
-        $html .= '<strong>The code for this shortcode was added to file located at:</strong><br/>
+        $html .= '<h4>The code for this shortcode was added to file located at:</h4>
         <i>"' . $this->shortcode->filename . '"</i><br/>';
         $html .= '<h4>The code generated and added to the file above by AGSG...</h4>
         <textarea readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
@@ -79,7 +79,7 @@ abstract class agsgShortcodeGenerator
     {
         $stg = "<$htmlTag id='$id' class='$class' style='$inlineStyle' ";
         for ($i = 0; $i < count($html_atts['names']); $i++) {
-            $stg .= $html_atts['names'][$i] . '="' . $html_atts['values'][$i] . '" ';
+            $stg .= $html_atts['names'][$i] . "='" . $html_atts['values'][$i] . "' ";
         }
         $stg .= '>';
         $etg = "</$htmlTag>";

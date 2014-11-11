@@ -8,6 +8,7 @@ span.error {
 
 #agsg_shortcode_preview textarea {
     display: block;
+    min-height: 100px;
     width: 100%;
 }
 

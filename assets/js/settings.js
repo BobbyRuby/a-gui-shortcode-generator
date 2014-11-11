@@ -119,7 +119,7 @@ jQuery(document).ready(function ($) {
         var inputs = jQuery(form).find("input, select, button, textarea");
         // serialize the data in the form
         serializedMatchData = jQuery(form).serialize();
-        alert(serializedMatchData);
+        alert('Attributes Mapped!');
         // prevent default posting of form
         event.preventDefault();
     });
@@ -158,11 +158,6 @@ jQuery(document).ready(function ($) {
         } else {
             longest = shortcodeTagATTs.length;
         }
-        console.log(htmlTagATTList);
-        console.log(htmlTagATTs);
-        console.log(shortcodeTagATTList);
-        console.log(shortcodeTagATTs);
-        console.log(longest);
         html_att_options += '<option value="select">Select HTML TAG Attribute</option>';
         att_options += '<option value="select">Select Shortcode Attribute</option>';
         // build select options
