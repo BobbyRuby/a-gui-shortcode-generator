@@ -236,6 +236,7 @@ class agsgNonATTenclosed extends agsgShortcode
     {
         if (!$this->tagExists($tag)) {
             // set some info we want to store or use
+            $this->name = $tag . '_agsg';
             $this->kind = 'NonATT';
             $this->type = 'enclosed';
             $this->htmlstg = $htmlstg;
@@ -243,8 +244,7 @@ class agsgNonATTenclosed extends agsgShortcode
             $this->id = $id;
             $this->class = $class;
             $this->example = $this->generateExample(); // $this->tag is set and ready to use so no need to use $tag
-            // log the shortcode to the db
-            $this->logShortcodeToDatabase();
+
             $this->shortcode_code = <<<EOD
 function $this->name
 EOD;
@@ -271,6 +271,8 @@ $htmletg";
 }
 add_shortcode( '$tag', '$this->name' );
 EOD;
+            // log the shortcode to the db
+            $this->logShortcodeToDatabase();
         }
     }
 

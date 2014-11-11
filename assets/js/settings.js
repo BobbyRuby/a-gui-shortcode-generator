@@ -504,6 +504,12 @@ jQuery(document).ready(function ($) {
         val = val.replace(/[<>]/g, '', 'gi').trim();
         jQuery(this).val(val);
     });
+    // listen for inline styles to keep input valid - ie strip off white space from sides
+    jQuery('[name="agsg_inline_styles"]').change(function (e) {
+        var val = jQuery(this).val();
+        val = val.trim();
+        jQuery(this).val(val);
+    });
     /**
      * End field .change modifications to force valid input
      */
@@ -533,11 +539,16 @@ jQuery(document).ready(function ($) {
         // serialize the data in the form
         var serializedData = jQuery(form).serialize();
 
-        // get values for validation and to see if what type of shortcode this is ( has_atts means its an ATT if not is a NonATT )
+        // get values for validation
         var shortcode_tag_name = jQuery('[name="agsg_shortcode_tag_name"]');
         var html_tag_name = jQuery('[name="agsg_html_tag_name"]');
-        var has_atts = jQuery('[name="agsg_has_atts"]');
-        var has_conditions = jQuery('[name="agsg_has_conditions"]');
+
+        var has_html_tag_atts_Yes = jQuery('#has_html_tag_atts_Yes').is(':checked');
+        var has_conditions_Yes = jQuery('#has_conditions_Yes').is(':checked');
+        var has_atts_No = jQuery('#has_atts_No').is(':checked');
+        var inline_styles = jQuery('#inline_styles');
+
+        var has_atts = jQuery('[name="agsg_has_atts"]'); // not used for validation check but to set the error msg
         var err = false;
 
         /**
@@ -549,7 +560,87 @@ jQuery(document).ready(function ($) {
         } else {
             err = false;
         }
-
+        // are there any html atts
+        if (has_html_tag_atts_Yes) {
+            // cycle through them and ensure there are no blanks
+            jQuery('[name="agsg_html_tag_att_name[]"]').each(function (e) {
+                // if blank
+                if (jQuery(this).val() === '') {
+                    jQuery(this).parent().parent().addClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                    jQuery(this).parent().prepend('<span class="error">Must not be empty.  Please fill in or remove.</span>');
+                    err = true;
+                }
+                else { // if filled
+                    // check to see if 'id' / 'class' / 'style' defined as html att
+                    if (jQuery(this).val() === 'id' || jQuery(this).val() === 'class' || jQuery(this).val() === 'style') {
+                        jQuery(this).parent().parent().addClass('form-invalid');
+                        jQuery(this).parent().find('.error').remove();
+                        jQuery(this).parent().prepend('<span class="error">Must not have id, class, or style html attributes defined as they are automatically defined.  Please remove.  You just need to create them as shortcode attributes below to use them.</span>');
+                        err = true;
+                    }
+                    else { // passed validation - ensure there no error messages
+                        jQuery(this).parent().parent().removeClass('form-invalid');
+                        jQuery(this).parent().find('.error').remove();
+                    }
+                }
+            });
+        }
+        // check inline styles are properly formatted
+        if (inline_styles.val() !== '') {
+            var inline_matches = inline_styles.val().match(/([a-z-]+: [0-9a-z#(). -]+;$)/g);
+            if (Array.isArray(inline_matches) === false) {
+                inline_styles.parent().parent().addClass('form-invalid');
+                inline_styles.parent().find('.error').remove();
+                inline_styles.parent().prepend('<span class="error">Must properly format inline styles. Please cut out your text in input using "CTRL+x" and see placeholder for example, then paster your text back in and reformat.</span>');
+                err = true;
+            } else { // passed
+                inline_styles.parent().parent().removeClass('form-invalid');
+                inline_styles.parent().find('.error').remove();
+            }
+        }
+        // check for blank attribute names if Yes is checked
+        if (!has_atts_No) {
+            jQuery('[name="agsg_att_name[]"]').each(function (e) {
+                if (jQuery(this).val() === '') {
+                    jQuery(this).parent().parent().addClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                    jQuery(this).parent().prepend('<span class="error">Must not be empty.  Please fill in or remove.</span>');
+                    err = true;
+                } else {
+                    jQuery(this).parent().parent().removeClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                }
+            });
+        }
+        // check that if and evaluate are selected if trying to use conditions
+        if (has_conditions_Yes) {
+            // evaluate
+            jQuery('[name="agsg_shortcode_condition_attribute[]"]').each(function (e) {
+                if (jQuery(this).find('option:selected').val() === 'select') {
+                    jQuery(this).parent().parent().addClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                    jQuery(this).parent().prepend('<span class="error">Must select an attribute.</span>');
+                    err = true;
+                } else {
+                    jQuery(this).parent().parent().removeClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                }
+            });
+            // if
+            jQuery('[name="agsg_shortcode_condition_type[]"]').each(function (e) {
+                if (jQuery(this).find('option:selected').val() === 'select') {
+                    jQuery(this).parent().parent().addClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                    jQuery(this).parent().prepend('<span class="error">Must select IF.</span>');
+                    err = true;
+                } else {
+                    jQuery(this).parent().parent().removeClass('form-invalid');
+                    jQuery(this).parent().find('.error').remove();
+                }
+            });
+        }
+        // check shortcode tag
         if (shortcode_tag_name.val() === '') {
             jQuery(shortcode_tag_name).parent().parent().addClass('form-invalid');
             jQuery(shortcode_tag_name).parent().find('.error').remove();
@@ -558,7 +649,7 @@ jQuery(document).ready(function ($) {
         } else {
             jQuery(shortcode_tag_name).parent().parent().removeClass('form-invalid').find('.error').remove();
         }
-
+        // check html tag
         if (html_tag_name.val() === '') {
             jQuery(html_tag_name).parent().parent().addClass('form-invalid');
             jQuery(html_tag_name).parent().find('.error').remove();
@@ -568,7 +659,7 @@ jQuery(document).ready(function ($) {
             jQuery(html_tag_name).parent().parent().removeClass('form-invalid').find('.error').remove();
         }
         // if conditions are present then make sure we have attributes present
-        if (jQuery('#has_conditions_Yes').is(':checked') && jQuery('#has_atts_No').is(':checked')) {
+        if (has_conditions_Yes && has_atts_No) {
             jQuery(has_atts).parent().parent().addClass('form-invalid');
             jQuery(has_atts).parent().find('.error').remove();
             jQuery('#has_atts_Yes').parent().prepend('<span class="error">Must have attributes to use the conditionals.</span>'); // added to only the yes to prevent duplicate msg
