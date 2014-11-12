@@ -219,7 +219,7 @@ jQuery(document).ready(function ($) {
                 '</span><br/>' +
                 '</td></tr>';
             jQuery(this).parent().parent().parent().after(html);
-            jQuery('[for="shortcode_condition_type"] .dashicons-dismiss').click(function (e) {
+            jQuery('[for="agsg_shortcode_condition_type[]"] .dashicons-dismiss').click(function (e) {
                 if (window.confirm("You will lose this condition and its' data. Continue?")) {
                     // check what condition was just set so the proper amount can be removed.
                     jQuery(this).parent().parent().parent().parent().next().remove();
@@ -262,8 +262,6 @@ jQuery(document).ready(function ($) {
                     html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Operator</th><td><select id="shortcode_condition_' + condition_id_num + '_operator" class="shortcode_condition_operator" name="agsg_shortcode_condition_operator[]">';
                     html += '<option value="==">equal to value</option>' +
                         '<option value="!=">not equal to value</option>' +
-//                        '<option value="===">equal to value and type</option>' +
-//                        '<option value="!==">not equal to value or type</option>' +
                         '<option value="<=">less than or equal to value</option>' +
                         '<option value="<">less than value</option>' +
                         '<option value=">=">greater than or equal to value</option>' +
@@ -275,7 +273,7 @@ jQuery(document).ready(function ($) {
                         '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
                         '</td></tr>';
                     // action to do if true
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here beneath the base content of the shortcode.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">This is where you can add some conditional content to appear above the normally rendered content depending on an attribute value.<br/></span></label></td></tr>';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here <span class="error">ABOVE</span> the base content of the shortcode.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">This is where you can add some conditional content to appear above the normally rendered content depending on an attribute value.<br/></span></label></td></tr>';
                     // push this id into the array
                     tinyMCEids.push('shortcode_condition_' + condition_id_num + '_tinyMCE');
 
@@ -583,7 +581,7 @@ jQuery(document).ready(function ($) {
         }
         // check inline styles are properly formatted
         if (inline_styles.val() !== '') {
-            var inline_matches = inline_styles.val().match(/([a-z-]+: [0-9a-z#(). -]+;$)/g);
+            var inline_matches = inline_styles.val().match(/([a-z-]+: [0-9a-z#(). -]+;)/g);
             if (Array.isArray(inline_matches) === false) {
                 inline_styles.parent().parent().addClass('form-invalid');
                 inline_styles.parent().find('.error').remove();

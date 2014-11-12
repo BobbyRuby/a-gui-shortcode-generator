@@ -28,7 +28,7 @@ class agsgATTenclosed extends agsgShortcode
             $unmapped_html_att_values = array_filter($html_att_values, array($this, 'filterHTMLattValues'));
             $filtered_shortcode_att_names = array_filter($mapped_shortcode_att_names, array($this, 'removeSelect'));
             $filtered_html_att_names = array_filter($mapped_html_att_names, array($this, 'removeSelect'));
-        error_reporting('ALL');
+        error_reporting(E_ALL);
         $att_match_str = '';
             $this->shortcodes_atts_str = '';
             $unmapped_html_atts = '';
@@ -89,6 +89,9 @@ STRING;
             // create function
             $this->shortcode_code = <<<STRING
 //$tag
+/**
+* $this->description
+/
 function $this->name (
 STRING;
             $this->shortcode_code .= <<<'VARSTR'

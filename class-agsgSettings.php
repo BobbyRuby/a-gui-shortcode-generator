@@ -362,58 +362,6 @@ class agsgSettings
                             'placeholder' => __('Ex: my_shortcode', 'plugin_textdomain')
                         ),
                         array(
-                            'id' => 'html_tag_name',
-                            'label' => __('HTML TAG Name', 'plugin_textdomain'),
-                            'description' => __('The HTML tag name that content will be placed in between without the "<" and ">" symbols.<br/>
-                            Example Input: div ', 'plugin_textdomain'),
-                            'type' => 'text',
-                            'default' => '',
-                            'placeholder' => __('Ex: div', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'id',
-                            'label' => __('ID', 'plugin_textdomain'),
-                            'description' => __('The HTML tag\'s id for hooking to with CSS or JS.', 'plugin_textdomain'),
-                            'type' => 'text',
-                            'default' => '',
-                            'placeholder' => __('Ex: my-shortcode-content', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'class',
-                            'label' => __('Class', 'plugin_textdomain'),
-                            'description' => __('The HTML tag\'s class for hooking to with CSS or JS.<br/>
-                             Example Input:"class" or "class1 class2"', 'plugin_textdomain'),
-                            'type' => 'text',
-                            'default' => '',
-                            'placeholder' => __('Ex: some-shortcode-content', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'has_html_tag_atts',
-                            'label' => __('Give your HTML tag some attributes?
-                                            <div id="add_html_tag_att"><span class="add_att_description">Add another HTML TAG attribute</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
-                            'description' => __('You can give your HTML tags attributes that can be set statically here or by pairing them up with shortcode attributes so that they can be set later.  Please note that if you create an attribute here named "class" in will not override the values set above but will be added to the class list.', 'plugin_textdomain'),
-                            'type' => 'radio',
-                            'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
-                            'default' => __('No', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'inline_styles',
-                            'label' => __('Inline Styles', 'plugin_textdomain'),
-                            'description' => __('You can put any valid styles you would normally put in a \'style=""\' attribute for an HTML tag.<br/>
-                            Example Input: "font-size: 30px; color: #eaeaea; background: #00000;"', 'plugin_textdomain'),
-                            'type' => 'text',
-                            'default' => '',
-                            'placeholder' => __('Ex: font-size: 30px; color: #eaeaea; background: #00000;', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'process_shortcodes',
-                            'label' => __('Process Shortcodes Recursively.', 'plugin_textdomain'),
-                            'description' => __('If this shortcode might wrap another shortcode, this should be "Yes".', 'plugin_textdomain'),
-                            'type' => 'radio',
-                            'options' => array('Yes' => 'Yes', 'No' => 'No'),
-                            'default' => 'No'
-                        ),
-                        array(
                             'id' => 'description',
                             'label' => __('Describe the shortcode.', 'plugin_textdomain'),
                             'description' => __('If you want, you can give your shortcode a description.', 'plugin_textdomain'),
