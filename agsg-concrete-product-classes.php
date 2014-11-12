@@ -23,11 +23,13 @@ class agsgATTenclosed extends agsgShortcode
             $html_att_values = $html_atts['values'];
             $mapped_html_att_names = $mapped_atts['match_html_att_names'];
             $mapped_shortcode_att_names = $mapped_atts['match_shortcode_att_names'];
-            $unmapped_html_att_names = array_diff($html_att_names, $mapped_html_att_names); // which weren't mapped?
+        error_reporting(0);
+        $unmapped_html_att_names = array_diff($html_att_names, $mapped_html_att_names); // which weren't mapped?
             $unmapped_html_att_values = array_filter($html_att_values, array($this, 'filterHTMLattValues'));
             $filtered_shortcode_att_names = array_filter($mapped_shortcode_att_names, array($this, 'removeSelect'));
             $filtered_html_att_names = array_filter($mapped_html_att_names, array($this, 'removeSelect'));
-            $att_match_str = '';
+        error_reporting('ALL');
+        $att_match_str = '';
             $this->shortcodes_atts_str = '';
             $unmapped_html_atts = '';
 
@@ -94,15 +96,14 @@ STRING;
 
 VARSTR;
             $this->shortcode_code .= <<<'VARSTR'
-$a = shortcode_atts(
+    $a = shortcode_atts(
 VARSTR;
             $this->shortcode_code .= <<<STRING
  $this->shortcodes_atts_str,
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
  $atts );
-
- $var =
+    $var =
 VARSTR;
             // is their an override for the html tag
             if ($this->htmlTagOR) {
@@ -169,11 +170,41 @@ EOD;
                     $value = $condition["value"];
                     if (!$value) $value = '\'\'';
                     $tinyMCE = $condition["tinyMCE"];
+                    // parse tiny mce content and find references to attributes
+                    foreach ($att_names as $att_name) {
+                        if (strpos($tinyMCE, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
+                            $tinyMCE_re = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', '$a[\'' . $att_name . '\']', $tinyMCE);
+                            $after_replace = explode(' ', $tinyMCE_re);
+                            // cycle through all the pieces so we can add this referenced att to the array
+                            foreach ($after_replace as $iv) {
+                                // of this is an attribute
+                                if (strpos($iv, 'a[\'')) {
+                                    // check to see if this att ref was at the end of an html element
+                                    if (strpos($iv, '<')) {
+                                        $iv = preg_replace('/([<\/a-z>]+$)/', '', $iv); // replace html element within $iv to keep variable string intact
+                                    }
+                                    $ref_atts[] = "$$att_name = $iv"; // referenced atts
+                                    // replace original with the att var generated
+                                    $tinyMCE = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "$$att_name", $tinyMCE);
+                                }
+                            }
+                        }
+                    }
+
                     $this->shortcode_code .= <<<STRING
 
-                $type ( $attribute $operator $value ){
-                    echo '$tinyMCE';
-                }
+    $type ( $attribute $operator $value ){
+STRING;
+                    foreach ($ref_atts as $ref_att) {
+                        $this->shortcode_code .= <<<STRING
+
+        $ref_att;
+STRING;
+                    }
+                    $this->shortcode_code .= <<<STRING
+
+        echo "$tinyMCE";
+    }
 STRING;
                 }
             }

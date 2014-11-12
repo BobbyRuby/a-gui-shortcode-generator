@@ -275,7 +275,7 @@ jQuery(document).ready(function ($) {
                         '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
                         '</td></tr>';
                     // action to do if true
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Action if evaluation is true.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">Enter data here</span></label></td></tr>';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here beneath the base content of the shortcode.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">This is where you can add some conditional content to appear above the normally rendered content depending on an attribute value.<br/></span></label></td></tr>';
                     // push this id into the array
                     tinyMCEids.push('shortcode_condition_' + condition_id_num + '_tinyMCE');
 
@@ -755,6 +755,7 @@ function loadTinyMCE(selector, existing_ids) {
             toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
             toolbar2: "preview media | forecolor backcolor emoticons insertfile",
             menubar: "tools table format view insert edit"
+
         });
         // restart all current instances
         for (var i = 0; i < existing_ids.length; i++) {
