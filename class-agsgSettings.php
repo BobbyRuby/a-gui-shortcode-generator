@@ -224,7 +224,7 @@ class agsgSettings
         // Begin Page
         $pageSlug = 'eagsg';
         $settings[$pageSlug] = array(
-            'title' => __('A GUI Shortcode Generator', 'plugin_textdomain'),
+            'title' => __('A FREE GUI Shortcode Generator', 'plugin_textdomain'),
             'slug' => $pageSlug,
             'sections' => array(
                 'html-enclose' => array(
@@ -240,10 +240,10 @@ class agsgSettings
                         <li>A custom implementation of <a href="http://tinymce.com/" target="_blank" title="TinyMCE">TinyMCE</a> which allows the creation of tables, divs, images, video embeds and more to add customized content that is conditionally displayed while providing a custom "attribute reference" syntax to allow you to place attributed values within the content you want conditionally displayed.</li>
                         <li>Add conditonal statements to shortcodes so you can display additional content on a per use basis when using enclosed shortcodes or when using self closed shortcodes, replace the shortcode with content conditionally per use. The content is displayed based on the value of an attribute you set up within a condition using the AGSG. The content also may contain references to other attibutes via the "attribute reference" syntax --> "&lt;&lt;i_am_an_attribute&gt;&gt;".</li>
                         <li>Make enclosed shortcodes process other shortcodes.</li>
-                        <li>Eventually there will be a pro version is in the works that implements even more functionality!  I am in the planning phases.</li>
-                     </ol>
+                       </ol>
                     </p>
-                    <p>If this plugin has helped you out then buy me a beer at the bar!  <a href="http://donate" title="Buy me a beer">Donate to support the future development of this FREE plugin!</a></p>', 'plugin_textdomain'),
+                    <p>A pro version is in the works that implements even more functionality!  Feartures being considered are making it easy to create a recent posts shortcode, recent facebook updates, twitter updates, and more stuff.<br>
+                     If this plugin has helped you out then buy me a beer at the bar! <a target="_blank" href="https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=MbR34ArD7X0ecLR9elSOxj9ZNg5JSTHtJsdhcajRVGkmR48AW6EMhoU4uju&dispatch=5885d80a13c0db1f8e263663d3faee8d66f31424b43e9a70645c907a6cbd8fb4" title="Buy me a Beer!">Donate to support the future development of this FREE plugin!</a></p>', 'plugin_textdomain'),
                     'page_slug' => $pageSlug,
                     'fields' => array(
                         array(
@@ -353,7 +353,9 @@ class agsgSettings
                         )
                     ) // end fields
                 ) // end section
-            )// end sections
+            ),
+            'donate' => '<a target="_blank" href="https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=MbR34ArD7X0ecLR9elSOxj9ZNg5JSTHtJsdhcajRVGkmR48AW6EMhoU4uju&dispatch=5885d80a13c0db1f8e263663d3faee8d66f31424b43e9a70645c907a6cbd8fb4" title="Buy me a Beer!"><input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                        <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1"></a>'
         ); // end page
 
         return $settings;
@@ -609,6 +611,7 @@ class agsgSettings
                 $html .= '<div title="" id="map_attributes"><span id="map_att_description"><a title="Mapping your HTML TAG attributes to your shortcode attributes." href="#TB_inline?width=600&height=550&inlineId=attribute_matcher" class="thickbox">Map HTML TAG attributes to your shortcode attributes.</span><span class="dashicons dashicons-location-alt"></span></a></div>' . "\n";
                 $html .= '<div id="agsg_' . $page['slug'] . '_settings">' . "\n";
                 $html .= '<h2>' . __($page['title'], 'plugin_textdomain') . '</h2>' . "\n";
+                $html .= '<h3>' . __($page['donate'], 'plugin_textdomain') . '</h3>' . "\n";
 //                $html .= '<div>' . __($page['sections']['html-enclose']['description'], 'plugin_textdomain') . '</div>' . "\n";
                 $html .= '<form id="agsg_' . $page['slug'] . '_form" method="post" action="options.php" enctype="multipart/form-data">' . "\n";
                 $html .= $this->display_hidden_fields();
