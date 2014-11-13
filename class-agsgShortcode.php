@@ -29,6 +29,7 @@ abstract class agsgShortcode
     public function logShortcodeToDatabase()
     {
         global $wpdb;
+        $date = date('Y-m-d H:i:s');
         $table = $wpdb->prefix . 'agsg_shortcodes';
         $wpdb->insert($table,
             array( // columns
@@ -36,15 +37,11 @@ abstract class agsgShortcode
                 'name' => $this->name,
                 'kind' => $this->kind,
                 'tag' => $this->tag,
-                'htmlstg' => $this->htmlstg,
-                'htmletg' => $this->htmletg,
-                'description' => $this->description,
                 'example' => $this->example,
                 'code' => $this->shortcode_code,
+                'created_datetime' => $date,
             ),
             array( // formats
-                '%s',
-                '%s',
                 '%s',
                 '%s',
                 '%s',

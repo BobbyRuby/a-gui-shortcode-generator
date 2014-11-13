@@ -22,8 +22,7 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['short
     $tag = $inputs['tag'];
     $new_code = $inputs['new_code'];
     $new_code = str_replace("\\'", "'", $new_code);
-    agsgPlugin::deleteShortcode($tag);
-    agsgPlugin::addShortcodeToFile($new_code);
+    agsgPlugin::deleteShortcode($tag, $new_code);
     exit;
 } else if ($_POST['form_info']) {
 //    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
@@ -97,23 +96,37 @@ class agsgPlugin
         add_action('current_screen', array($this, 'addHelp'));
     }
 
-    public static function addShortcodeToFile($shortcode_code)
+    public static function addShortcodeToFile($tag, $shortcode_code)
     {
+        global $wpdb;
         $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
         if ($fh = fopen($fileName, 'a')) { // open file agsg for appending if true so we can append our shortcode
             fwrite($fh, PHP_EOL . $shortcode_code . PHP_EOL);
         }
         fclose($fh);
+        $table = $wpdb->prefix . 'agsg_shortcodes';
+        $wpdb->update(
+            $table,
+            array(
+                'code' => $shortcode_code
+            ),
+            array('tag' => $tag),
+            array(
+                '%s'
+            ),
+            array('%s')
+        );
         echo 'New Shortcode code Added';
     }
 
-    public static function deleteShortcode($tag)
+    public static function deleteShortcode($tag, $shortcode_code)
     {
         $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
         $source_file = file_get_contents($fileName);
         $source = preg_replace('/(\/\/' . $tag . ')(.*)(\/\/' . $tag . ')/s', "", $source_file);
         file_put_contents($fileName, $source);
         echo 'Old Shortcode code Deleted <br>';
+        agsgPlugin::addShortcodeToFile($tag, $shortcode_code);
     }
 
     public static function getInstance()
@@ -137,9 +150,6 @@ class agsgPlugin
           name VARCHAR(100) NOT NULL,
           kind VARCHAR(6) NOT NULL,
           tag VARCHAR(100) NOT NULL,
-          htmlstg VARCHAR(300) NOT NULL,
-          htmletg VARCHAR(20) NOT NULL,
-          description VARCHAR(300) NOT NULL,
           example VARCHAR(300) NOT NULL,
           code TEXT NOT NULL,
           created_datetime DATETIME NOT NULL,
@@ -200,15 +210,15 @@ class agsgPlugin
 }
 
 // Other functions for debugging - Uncomment when/if needed
-function rfd_debugger($debugItem, $die = 0)
-{
-    echo '<pre>';
-    print_r($debugItem);
-    echo '</pre>';
-    if ($die == 1) {
-        die();
-    }
-}
+//function rfd_debugger($debugItem, $die = 0)
+//{
+//    echo '<pre>';
+//    print_r($debugItem);
+//    echo '</pre>';
+//    if ($die == 1) {
+//        die();
+//    }
+//}
 //function showHooks()
 //{
 //    global $current_screen;

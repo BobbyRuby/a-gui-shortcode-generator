@@ -31,7 +31,8 @@ class agsgATTenclosed extends agsgShortcode
 
             // set some global vars we want to store or use
             $this->kind = 'ATT';
-            $this->type = 'enclosed';
+        $this->tag = $tag;
+        $this->type = 'enclosed';
             $this->id = $id;
             $this->class = $class;
             $this->htmlstg = "<$htmlTag>"; // default
@@ -167,7 +168,6 @@ EOD;
                     $operator = $condition["operator"];
                     $attribute = '$a[\'' . $condition["attribute"] . '\']';
                     $value = $condition["value"];
-                    if (!$value) $value = '\'\'';
                     $tinyMCE = $condition["tinyMCE"];
                     // parse tiny mce content and find references to attributes
                     foreach ($att_names as $att_name) {
@@ -235,7 +235,11 @@ EOD;
                         // replace original with the att var generated
                         $tinyMCE = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "$$att_name", $tinyMCE);
                     }
-                    $ref_atts = array_unique($ref_atts);
+                    if (isset($ref_atts) && is_array($ref_atts)) {
+                        $ref_atts = array_unique($ref_atts);
+                    } else {
+                        $ref_atts = array();
+                    }
                     if ($value === true || $value === false || $value === 0 || $value === 1) {
                     } else {
                         $value = "'$value'";
