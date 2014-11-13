@@ -98,3 +98,7 @@ span.error {
 .reset_condition {
     font-size: 12px;
 }
+
+ol.description {
+    font-style: italic;
+}

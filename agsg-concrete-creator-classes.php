@@ -14,7 +14,7 @@ class agsgATTgenerator extends agsgShortcodeGenerator
     public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
         if ($type == 'enclosed') {
-            $shortcode = new agsgATTenclosed($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions);
+            $shortcode = new agsgATTenclosed($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description);
         } else if ($type == 'self-closed') {
 //            $shortcode = new agsgATTselfclosed($htmlTag, $atts, $tag);
         } else {

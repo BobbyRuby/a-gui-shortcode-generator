@@ -12,11 +12,12 @@
  */
 class agsgATTenclosed extends agsgShortcode
 {
-    public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
+    public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description)
     {
 
         $this->name = $tag . '_agsg';
-            // Set up some local variables
+        $this->description = $description;
+        // Set up some local variables
             $att_names = $atts['names'];
             $att_values = $atts['values'];
             $html_att_names = $html_atts['names'];
@@ -91,7 +92,7 @@ STRING;
 //$tag
 /**
 * $this->description
-/
+**/
 function $this->name (
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
@@ -180,20 +181,70 @@ EOD;
                             $after_replace = explode(' ', $tinyMCE_re);
                             // cycle through all the pieces so we can add this referenced att to the array
                             foreach ($after_replace as $iv) {
-                                // of this is an attribute
-                                if (strpos($iv, 'a[\'')) {
+                                // if this is an attribute
+                                $pos = strpos($iv, 'a[\'');
+                                if ($pos !== false) {
                                     // check to see if this att ref was at the end of an html element
-                                    if (strpos($iv, '<')) {
-                                        $iv = preg_replace('/([<\/a-z>]+$)/', '', $iv); // replace html element within $iv to keep variable string intact
+                                    $pos = strpos($iv, '</');
+                                    if ($pos !== false) {
+                                        $iv = preg_replace('/([<\/a-z>]+)$/', '', $iv); // replace html element within $iv to keep variable string intact
+                                        // replace crap that happens when link added at end of an html element
+                                        $iv = preg_replace('/(&lt;&lt;[a-z_0-9]+&gt;&gt;)/', '', $iv);
+                                        $iv = '$a' . preg_replace('/(>\$[a-z_0-9]+)/', '', $iv);
                                     }
-                                    $ref_atts[] = "$$att_name = $iv"; // referenced atts
-                                    // replace original with the att var generated
-                                    $tinyMCE = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "$$att_name", $tinyMCE);
+                                    // check for link
+                                    $pos = strpos($iv, 'href=');
+                                    if ($pos !== false) {
+                                        $iv = str_replace('href=', '', $iv);
+                                        $iv = str_replace('"', '', $iv);
+                                    }
+                                    // check for link title
+                                    $pos = strpos($iv, 'title=');
+                                    if ($pos !== false) {
+                                        $iv = str_replace('title=', '', $iv);
+                                        $iv = str_replace('"', '', $iv);
+                                    }
+                                    // check for image src
+                                    $pos = strpos($iv, 'src=');
+                                    if ($pos !== false) {
+                                        $iv = str_replace('src=', '', $iv);
+                                        $iv = str_replace('"', '', $iv);
+                                    }
+                                    // check for image alt
+                                    $pos = strpos($iv, 'alt=');
+                                    if ($pos !== false) {
+                                        $iv = str_replace('alt=', '', $iv);
+                                        $iv = str_replace('"', '', $iv);
+                                    }
+                                    // check for image crazy attribute problem
+                                    $pos = strpos($iv, '&lt;&lt;');
+                                    if ($pos !== false) {
+                                        $iv = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', '', $iv);
+                                        $iv = str_replace('>', '', $iv);
+                                        $iv = str_replace('"', '', $iv);
+                                    }
+                                    // check for link target
+                                    $pos = strpos($iv, 'target=');
+                                    if ($pos !== false) {
+                                        $iv = preg_replace('/(target=.+["])/', '', $iv);
+                                    }
+                                    // iv should not have an $a so it should be taken off
+                                    $pos = strpos($iv, '$a$a');
+                                    if ($pos !== false) {
+                                        $iv = str_replace('$a$a', '$a', $iv);
+                                    }
+                                    $ref_atts[] = "$$att_name = $iv";
                                 }
                             }
                         }
+                        // replace original with the att var generated
+                        $tinyMCE = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "$$att_name", $tinyMCE);
                     }
-
+                    $ref_atts = array_unique($ref_atts);
+                    if ($value === true || $value === false || $value === 0 || $value === 1) {
+                    } else {
+                        $value = "'$value'";
+                    }
                     $this->shortcode_code .= <<<STRING
 
     $type ( $attribute $operator $value ){
@@ -204,18 +255,20 @@ STRING;
         $ref_att;
 STRING;
                     }
-                    $this->shortcode_code .= <<<STRING
+                    $this->shortcode_code .= <<<'VARSTR'
 
-        echo "$tinyMCE";
+        $var .=
+VARSTR;
+                    $tinyMCE = str_replace('"', "'", $tinyMCE);
+                    $this->shortcode_code .= <<<STRING
+ "$tinyMCE";
     }
 STRING;
                 }
             }
             $this->shortcode_code .= <<<'VARSTR'
 
-    if($content){
-        return $var;
-    }
+    return $var;
 VARSTR;
             $this->shortcode_code .= <<<STRING
 

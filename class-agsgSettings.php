@@ -224,12 +224,22 @@ class agsgSettings
         // Begin Page
         $pageSlug = 'eagsg';
         $settings[$pageSlug] = array(
-            'title' => __('Enclosing Shorcode', 'plugin_textdomain'),
+            'title' => __('Shortcode', 'plugin_textdomain'),
             'slug' => $pageSlug,
             'sections' => array(
                 'html-enclose' => array(
-                    'title' => __('Generate a shortcode that encloses content.', 'plugin_textdomain'),
-                    'description' => __('', 'plugin_textdomain'),
+                    'title' => __('', 'plugin_textdomain'),
+                    'description' => __('<p>With this generator you can generate shortcodes that are from the most complicated to the most basic.  It was built to allow those without progamming knowledge to create shortcodes in which they could have never dreamed.</p>
+                    <p>These shortcodes include those that embed videos or complete custom layouts and much much more.<br/>
+                     <strong>It does this by providing the following features for generating code:</strong>
+                      <ol class="description">
+                        <li>Add HTML attriutes to wrapper elements for enclosing shortcodes.</li>
+                        <li>Add attriutes to shortcodes.</li>
+                        <li>Allow the mapping of shortcode attributes to HTML attributes.</li>
+                        <li>A custom implementation of <a href="http://tinymce.com/" target="_blank" title="TinyMCE">TinyMCE</a> which allows the creation of tables, divs, images, video embeds and more to add customized content that is conditionally displayed while providing a custom "attribute reference" syntax to allow you to place attributed values within the content you want conditionally displayed.</li>
+                        <li>Add conditonal statements to shortcodes so you can display additional content on a per use basis when using enclosed shortcodes or when using self closed shortcodes, replace the shortcode with content conditionally per use. The content is displayed based on the value of an attribute you set up within a condition using the AGSG. The content also may contain references to other attibutes via the "attribute reference" syntax --> "<<i_am_an_attribute>>".</li>
+                     </ol>
+                    </p>', 'plugin_textdomain'),
                     'page_slug' => $pageSlug,
                     'fields' => array(
                         array(
@@ -328,52 +338,6 @@ class agsgSettings
                             'description' => __('You can give your shortcode if statements that perform actions depending on attribute values.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> You create the "Actions" using a TinyMCE module that allows HTML, the ability to reference the shortcode attributes created with this shortcode, and other shortcodes.<br/>
                             <span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You can reference the attributes for this shortcode in the TinyMCE editor like this "&lt;&lt;i_am_a_shortcode_att&gt;&gt;"', 'plugin_textdomain'),
-                            'type' => 'radio',
-                            'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
-                            'default' => __('No', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'install_url',
-                            'type' => 'hidden',
-                            'default' => plugin_dir_url($this->file)
-                        )
-                    ) // end fields
-                ) // end section
-            )// end sections
-        ); // end page
-        $pageSlug = 'scagsg';
-        $settings[$pageSlug] = array(
-            'title' => __('Self Closing Shortcode', 'plugin_textdomain'),
-            'slug' => $pageSlug,
-            'sections' => array(
-                'html-enclose' => array(
-                    'title' => __('Generate a shortcode that replaces content.', 'plugin_textdomain'),
-                    'description' => __('', 'plugin_textdomain'),
-                    'page_slug' => $pageSlug,
-                    'fields' => array(
-                        array(
-                            'id' => 'shortcode_tag_name',
-                            'label' => __('Shortcode Tag', 'plugin_textdomain'),
-                            'description' => __('The tag used to invoke the shortcode function without the "[" or "]".<br/>
-                            Example Input:  my_shortcode<br/>
-                             <span class="dashicons dashicons-welcome-write-blog"></span>Important Note: this will also be the name of your shortcode function generated along with the "id" of the database row this shortcode occupy\'s', 'plugin_textdomain'),
-                            'type' => 'text',
-                            'default' => '',
-                            'placeholder' => __('Ex: my_shortcode', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'description',
-                            'label' => __('Describe the shortcode.', 'plugin_textdomain'),
-                            'description' => __('If you want, you can give your shortcode a description.', 'plugin_textdomain'),
-                            'type' => 'textarea',
-                            'default' => '',
-                            'placeholder' => __('Describe the shortcode here.', 'plugin_textdomain')
-                        ),
-                        array(
-                            'id' => 'has_atts',
-                            'label' => __('Give your shortcode some attributes?
-                                            <div id="add_shortcode_att"><span class="add_att_description">Add another shortcode attribute</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
-                            'description' => __('You can give your shortcode attributes that can be used to set attributes in the HTML or perform other actions, such as differ what is displayed by setting a condition in the conditions area.', 'plugin_textdomain'),
                             'type' => 'radio',
                             'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
                             'default' => __('No', 'plugin_textdomain')
@@ -641,6 +605,7 @@ class agsgSettings
                 $html .= '<div title="" id="map_attributes"><span id="map_att_description"><a title="Mapping your HTML TAG attributes to your shortcode attributes." href="#TB_inline?width=600&height=550&inlineId=attribute_matcher" class="thickbox">Map HTML TAG attributes to your shortcode attributes.</span><span class="dashicons dashicons-location-alt"></span></a></div>' . "\n";
                 $html .= '<div id="agsg_' . $page['slug'] . '_settings">' . "\n";
                 $html .= '<h2>' . __($page['title'], 'plugin_textdomain') . '</h2>' . "\n";
+//                $html .= '<div>' . __($page['sections']['html-enclose']['description'], 'plugin_textdomain') . '</div>' . "\n";
                 $html .= '<form id="agsg_' . $page['slug'] . '_form" method="post" action="options.php" enctype="multipart/form-data">' . "\n";
                 $html .= $this->display_hidden_fields();
 
@@ -680,66 +645,4 @@ class agsgSettings
             }
         }
     }
-
-    /**
-     * Load settings page content
-     * @return void
-     */
-    public function scagsg_settings_page()
-    {
-        (!$this->settings) ? $settings = $this->settings_fields() : $settings = $this->settings;
-        foreach ($settings as $page) {
-            if ($page['slug'] == 'scagsg') {
-                add_thickbox();
-                // Build page HTML
-                $html = '<div class="wrap" id="plugin_settings">' . "\n";
-                $html .= '
-                <div style="display:none;" id="attribute_matcher">
-                    <form id="attribute_matching_form" method="post">
-                        <br/>
-                        <input name="submit_attribute_matching_form" type="submit" class="button-primary" value="' . esc_attr(__('Set Mapping', 'plugin_textdomain')) . '" />
-                    </form>
-                </p></div>' . "\n";
-                $html .= '<div title="" id="map_attributes"><span id="map_att_description"><a title="Mapping your HTML TAG attributes to your shortcode attributes." href="#TB_inline?width=600&height=550&inlineId=attribute_matcher" class="thickbox">Map HTML TAG attributes to your shortcode attributes.</span><span class="dashicons dashicons-location-alt"></span></a></div>' . "\n";
-                $html .= '<div id="agsg_' . $page['slug'] . '_settings">' . "\n";
-                $html .= '<h2>' . __($page['title'], 'plugin_textdomain') . '</h2>' . "\n";
-                $html .= '<form id="agsg_' . $page['slug'] . '_form" method="post" action="options.php" enctype="multipart/form-data">' . "\n";
-                $html .= $this->display_hidden_fields();
-
-                // Setup navigation
-                //            $html .= '<ul id="settings-sections" class="subsubsub hide-if-no-js">' . "\n";
-                //            $html .= '<li><a class="tab all current" href="#all">' . __('All', 'plugin_textdomain') . '</a></li>' . "\n";
-                //            foreach ($page['sections'] as $section => $data) {
-                //                $html .= '<li>| <a class="tab" id="' . $section . '_tab" href="#' . $section . '">' . $data['title'] . '</a></li>' . "\n";
-                //            }
-
-                $html .= '</ul>' . "\n";
-
-                $html .= '<div class="clear"></div>' . "\n";
-                // Get settings fields
-                ob_start();
-                ?>
-                <div id="<?php echo $page['slug'] . '_container' ?>" class="settings_section_container">
-                    <?php
-                    settings_fields($page['slug']);
-                    do_settings_sections($page['slug']);
-                    ?>
-                </div>
-                <?php
-
-                $html .= ob_get_clean();
-
-                $html .= '<p class="submit">' . "\n";
-                $html .= $this->get_submit_button();
-                $html .= '</p>' . "\n";
-                $html .= '</form>' . "\n";
-                $html .= '<div id="agsg_shortcode_preview"></div>';
-                $html .= '</div>' . "\n";
-                $html .= '</div>' . "\n";
-
-                echo $html;
-            }
-        }
-    }
-
 }
