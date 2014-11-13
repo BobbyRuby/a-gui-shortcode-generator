@@ -19,6 +19,6 @@ A pro version is in the works that implements even more functionality!  Fearture
 ## Installation:
 Simple steps:
 
-    Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your WordPress installation.
-    Then activate the Plugin from Plugins page.
-    Don
+1. Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your WordPress installation.
+2. Then activate the Plugin from Plugins page.
+3. Don
