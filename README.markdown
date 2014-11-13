@@ -2,7 +2,8 @@ a-gui-shortcode-generator
 =========================
 With this generator you can generate shortcodes that are from the most complicated to the most basic.  It was built to allow those without programming knowledge to create shortcodes in which they could have never dreamed.
 hese shortcodes include those that embed videos or complete custom layouts and much much more.
- ** It does this by providing the following features for generating code: **
+
+** It does this by providing the following features for generating code: **
 * Add HTML attriutes to wrapper elements for enclosing shortcodes.
 * Add attriutes to shortcodes which you can use for lots of different implementations.
 * Allow the mapping of shortcode attributes to HTML attributes.
