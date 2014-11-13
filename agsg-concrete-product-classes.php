@@ -5,11 +5,6 @@
  * @package WordPress
  * @subpackage AGSG
  */
-/** sample attributes
- * Classes you deam optional by the user ( any kind of tag )
- * The link, height, and width to a You Tube video
- * You tube video ex <iframe width="ATTRIBUTE VALUE" height="ATTRIBUTE VALUE" src="ATTRIBUTE VALUE" frameborder="0" allowfullscreen></iframe>
- */
 class agsgATTenclosed extends agsgShortcode
 {
     public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description)
@@ -314,20 +309,15 @@ STRING;
     }
 }
 
-//class agsgATTselfclosed extends agsgShortcode
-//{
-//    public function __construct($htmlTag, $atts, $tag)
-//    {
-//    }
-//}
-
 class agsgNonATTenclosed extends agsgShortcode
 {
     public function __construct($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class)
     {
             // set some info we want to store or use
             $this->name = $tag . '_agsg';
-            $this->kind = 'NonATT';
+        $this->description = $description;
+        $this->tag = $tag;
+        $this->kind = 'NonATT';
             $this->type = 'enclosed';
             $this->htmlstg = $htmlstg;
             $this->htmletg = $htmletg;
@@ -337,6 +327,9 @@ class agsgNonATTenclosed extends agsgShortcode
 
             $this->shortcode_code = <<<EOD
 //$tag
+/**
+* $this->description
+**/
 function $this->name
 EOD;
             $this->shortcode_code .= <<<'EOD'
@@ -379,11 +372,3 @@ EOD;
 
     }
 }
-//
-//class agsgNonATTselfclosed extends agsgShortcode
-//{
-//    public function __construct($htmlTag, $atts, $tag)
-//    {
-//
-//    }
-//}

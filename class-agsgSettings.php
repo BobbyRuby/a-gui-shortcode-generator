@@ -224,22 +224,26 @@ class agsgSettings
         // Begin Page
         $pageSlug = 'eagsg';
         $settings[$pageSlug] = array(
-            'title' => __('Shortcode', 'plugin_textdomain'),
+            'title' => __('A GUI Shortcode Generator', 'plugin_textdomain'),
             'slug' => $pageSlug,
             'sections' => array(
                 'html-enclose' => array(
                     'title' => __('', 'plugin_textdomain'),
-                    'description' => __('<p>With this generator you can generate shortcodes that are from the most complicated to the most basic.  It was built to allow those without progamming knowledge to create shortcodes in which they could have never dreamed.</p>
+                    'description' => __('<p>With this generator you can generate shortcodes that are from the most complicated to the most basic.  It was built to allow those without programming knowledge to create shortcodes in which they could have never dreamed.</p>
                     <p>These shortcodes include those that embed videos or complete custom layouts and much much more.<br/>
                      <strong>It does this by providing the following features for generating code:</strong>
                       <ol class="description">
                         <li>Add HTML attriutes to wrapper elements for enclosing shortcodes.</li>
-                        <li>Add attriutes to shortcodes.</li>
+                        <li>Add attriutes to shortcodes which you can use for lots of different implementations.</li>
                         <li>Allow the mapping of shortcode attributes to HTML attributes.</li>
+                        <li>Allows the overriding of the id HTML attribute and html tag name in wrapper elements for enclosed shortcodes.</li>
                         <li>A custom implementation of <a href="http://tinymce.com/" target="_blank" title="TinyMCE">TinyMCE</a> which allows the creation of tables, divs, images, video embeds and more to add customized content that is conditionally displayed while providing a custom "attribute reference" syntax to allow you to place attributed values within the content you want conditionally displayed.</li>
-                        <li>Add conditonal statements to shortcodes so you can display additional content on a per use basis when using enclosed shortcodes or when using self closed shortcodes, replace the shortcode with content conditionally per use. The content is displayed based on the value of an attribute you set up within a condition using the AGSG. The content also may contain references to other attibutes via the "attribute reference" syntax --> "<<i_am_an_attribute>>".</li>
+                        <li>Add conditonal statements to shortcodes so you can display additional content on a per use basis when using enclosed shortcodes or when using self closed shortcodes, replace the shortcode with content conditionally per use. The content is displayed based on the value of an attribute you set up within a condition using the AGSG. The content also may contain references to other attibutes via the "attribute reference" syntax --> "&lt;&lt;i_am_an_attribute&gt;&gt;".</li>
+                        <li>Make enclosed shortcodes process other shortcodes.</li>
+                        <li>Eventually there will be a pro version is in the works that implements even more functionality!  I am in the planning phases.</li>
                      </ol>
-                    </p>', 'plugin_textdomain'),
+                    </p>
+                    <p>If this plugin has helped you out then buy me a beer at the bar!  <a href="http://donate" title="Buy me a beer">Donate to support the future development of this FREE plugin!</a></p>', 'plugin_textdomain'),
                     'page_slug' => $pageSlug,
                     'fields' => array(
                         array(
@@ -462,8 +466,8 @@ class agsgSettings
             case 'text':
             case 'password':
             case 'number':
-                if ($field['grab_array']) {
-                    $html .= '<input id="' . esc_attr($field['id']) . '" type="' . $field['type'] . '" name="' . esc_attr($option_name) . '[]" placeholder="' . esc_attr($field['placeholder']) . '" value="' . $data . '"/>' . "\n";
+            if (isset($field['grab_array'])) {
+                $html .= '<input id="' . esc_attr($field['id']) . '" type="' . $field['type'] . '" name="' . esc_attr($option_name) . '[]" placeholder="' . esc_attr($field['placeholder']) . '" value="' . $data . '"/>' . "\n";
                 } else {
                     $html .= '<input id="' . esc_attr($field['id']) . '" type="' . $field['type'] . '" name="' . esc_attr($option_name) . '" placeholder="' . esc_attr($field['placeholder']) . '" value="' . $data . '"/>' . "\n";
                 }

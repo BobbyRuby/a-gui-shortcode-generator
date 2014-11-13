@@ -7,18 +7,23 @@ Version: 0.0.1
 Author: Bobby Ruby
 Author URI:
 */
+error_reporting(E_ERROR);
 // if not accessed by a post from this form
-if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
+if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['shortcode_rewrite']) {
     // make sure it wasn't accessed directly
     if (!defined('ABSPATH')) exit;
     register_activation_hook(__FILE__, array('agsgPlugin', 'install')); // install plugin on activation
     add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
     add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
-} else if (isset($_POST['shortcode_rewrite'])) {
-    $tag = $_POST['shortcode_rewrite']['tag'];
-    $code = $_POST['shortcode_rewrite']['code'];
+} else if ($_POST['shortcode_rewrite']) {
+    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
+    // grab serialized data
+    parse_str($_POST['shortcode_rewrite'], $inputs);
+    $tag = $inputs['tag'];
+    $new_code = $inputs['new_code'];
+    $new_code = str_replace("\\'", "'", $new_code);
     agsgPlugin::deleteShortcode($tag);
-    agsgPlugin::addShortcodeToFile($code);
+    agsgPlugin::addShortcodeToFile($new_code);
     exit;
 } else if ($_POST['form_info']) {
 //    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
@@ -72,7 +77,7 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     }
     exit;
 }
-
+error_reporting(E_ALL);
 include_once('agsg_shortcodes.php');
 include_once('class-agsgSettings.php');
 
@@ -98,6 +103,7 @@ class agsgPlugin
             fwrite($fh, PHP_EOL . $shortcode_code . PHP_EOL);
         }
         fclose($fh);
+        echo 'New Shortcode code Added';
     }
 
     public static function deleteShortcode($tag)
@@ -106,6 +112,7 @@ class agsgPlugin
         $source_file = file_get_contents($fileName);
         $source = preg_replace('/(\/\/' . $tag . ')(.*)(\/\/' . $tag . ')/s', "", $source_file);
         file_put_contents($fileName, $source);
+        echo 'Old Shortcode code Deleted <br>';
     }
 
     public static function getInstance()

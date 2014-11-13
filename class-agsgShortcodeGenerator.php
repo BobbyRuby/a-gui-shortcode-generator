@@ -75,11 +75,71 @@ abstract class agsgShortcodeGenerator
                 $this->shortcode->tag
             );
             $oldshortcode_code = $wpdb->get_var($sql);
-            $html .= '<h4><label for="old_shortcode">Old Shortcode</label></h4><textarea id="old_shortcode" readonly="readonly">' . $oldshortcode_code . '</textarea>';
-            $html .= '<h4><label for="new_shortcode">Preview of Replacement Shortcode if Regenerated</label></h4><textarea id="new_shortcode" readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
+            $html .= '<form id="regen" method="post">';
+            $html .= '<h4><label for="tag">Shortcode Tag</label></h4><input id="tag" name="tag" type="text" value="' . $this->shortcode->tag . '" readonly />';
+            $html .= '<h4><label for="old_shortcode">Old Shortcode Code</label></h4><textarea id="old_shortcode" readonly="readonly">' . $oldshortcode_code . '</textarea>';
+            $html .= '<h4><label for="new_shortcode">Preview of Replacement Code for Shortcode if Regenerated</label></h4><textarea id="new_shortcode" name="new_code" readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
             $html .= $this->getOverwriteShortcodeButton();
+            $html .= '</form>';
+            /**
+             * Begin eagsg page regen form
+             */
+            $script = <<<SCRIPT
+            <script type="text/javascript">
+            var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
+            var page = dir + 'class-agsgPlugin.php';
+            var regenRequest = '';
+            jQuery("#regen").submit(function (event) {
+                // prevent default posting of form
+                event.preventDefault();
+                // abort any pending regenRequest
+                if (regenRequest) {
+                    regenRequest.abort();
+                }
+                // setup some local variables
+                var form = jQuery(this);
+                // let's select and cache all the fields
+                var inputs = jQuery(form).find("input, select, button, textarea");
+                // serialize the data in the form
+                var serializedData = jQuery(form).serialize();
+
+                // let's disable the inputs for the duration of the ajax regenRequest
+                jQuery(inputs).prop("disabled", true);
+                // fire off the regenRequest
+                regenRequest = jQuery.ajax({
+                    url: page,
+                    type: "post",
+                    data: { shortcode_rewrite: serializedData }
+                });
+                // callback handler that will be called on success
+                regenRequest.done(function (html, response, textStatus, jqXHR) {
+                    // output shortcode information
+                    jQuery('#agsg_shortcode_preview').append(html);
+                });
+                // callback handler that will be called on failure
+                regenRequest.fail(function (jqXHR, textStatus, errorThrown) {
+                    // log the error to the console
+                    console.error(
+                        "The following error occured: " +
+                        textStatus, errorThrown
+                    );
+                });
+                // if the regenRequest failed or succeeded
+                regenRequest.always(function () {
+                    // reenable the inputs
+                    jQuery(inputs).prop("disabled", false);
+                });
+
+    });
+    </script>
+SCRIPT;
+            /**
+             * End eagsg page regen form -- shortcode_rewrite
+             */
+
         }
         echo $html;
+        echo $script;
     }
 
     private function getOverwriteShortcodeButton()
