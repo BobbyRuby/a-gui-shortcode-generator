@@ -279,11 +279,16 @@ STRING;
 
     public function generateExample()
     {
-        $example = "[$this->tag ";
+        $example = "Enclosing Example -- [$this->tag ";
         foreach ($this->shortcode_atts as $a => $dv) {
             $example .= "$a=\"$dv\" ";
         }
-        $example .= "]Some shortcode content.[/$this->tag]";
+        $example .= "]Some shortcode content.[/$this->tag]<br/>";
+        $example .= "Self Closing Example[$this->tag ";
+        foreach ($this->shortcode_atts as $a => $dv) {
+            $example .= "$a=\"$dv\" ";
+        }
+        $example .= " /]";
         return $example;
     }
 
