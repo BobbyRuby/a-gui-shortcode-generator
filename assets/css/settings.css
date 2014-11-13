@@ -101,4 +101,5 @@ span.error {
 
 ul.description {
     font-style: italic;
+    list-style: outside none circle;
 }
