@@ -108,7 +108,7 @@ class agsgSettings
         // Begin Page
         $pageSlug = 'eagsg';
         $settings[$pageSlug] = array(
-            'title' => __('A FREE GUI Shortcode Generator', 'plugin_textdomain'),
+            'title' => __('A GUI Shortcode Generator', 'plugin_textdomain'),
             'slug' => $pageSlug,
             'sections' => array(
                 'html-enclose' => array(
@@ -235,14 +235,7 @@ class agsgSettings
                         )
                     ) // end fields
                 ) // end section
-            ),
-            'donate' => '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="DMCVQCQ8GTN4G">
-<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-</form>
-'
+            )
         ); // end page
 
         return $settings;
@@ -498,7 +491,6 @@ class agsgSettings
                 $html .= '<div title="" id="map_attributes"><span id="map_att_description"><a title="Mapping your HTML TAG attributes to your shortcode attributes." href="#TB_inline?width=600&height=550&inlineId=attribute_matcher" class="thickbox">Map HTML TAG attributes to your shortcode attributes.</span><span class="dashicons dashicons-location-alt"></span></a></div>' . "\n";
                 $html .= '<div id="agsg_' . $page['slug'] . '_settings">' . "\n";
                 $html .= '<h2>' . __($page['title'], 'plugin_textdomain') . '</h2>' . "\n";
-                $html .= '<h3>' . __($page['donate'], 'plugin_textdomain') . '</h3>' . "\n";
 //                $html .= '<div>' . __($page['sections']['html-enclose']['description'], 'plugin_textdomain') . '</div>' . "\n";
                 $html .= '<form id="agsg_' . $page['slug'] . '_form" method="post" action="options.php" enctype="multipart/form-data">' . "\n";
                 $html .= $this->display_hidden_fields();

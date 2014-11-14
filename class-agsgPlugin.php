@@ -4,7 +4,7 @@ Plugin Name: A GUI Shortcode Generator Plugin
 Plugin URI:
 Description: Generates shortcodes from WordPress admin page.  Make custom shortcodes in minutes without any coding knowledge.
 Version: 0.0.1
-Author: Bobby Ruby
+Author: Robert Ruby II
 Author URI:
 */
 error_reporting(E_ERROR);
