@@ -12,8 +12,6 @@ These shortcodes include those that embed videos or complete custom layouts and 
 * Add conditonal statements to shortcodes so you can display additional content on a per use basis when using enclosed shortcodes or when using self closed shortcodes, replace the shortcode with content conditionally per use. The content is displayed based on the value of an attribute you set up within a condition using the AGSG. The content also may contain references to other attibutes via the "attribute reference" syntax --> "&lt;&lt;i_am_an_attribute&gt;&gt;".
 * Make enclosed shortcodes process other shortcodes.
    
-A pro version is in the works that implements even more functionality!  Features being considered are making it easy to create a recent posts shortcode, recent facebook updates, twitter updates, and more stuff.
-
 ## Installation:
 Simple steps:
 
@@ -22,4 +20,4 @@ Simple steps:
 3. Done.
 
 ## Channelog
-0.0.1 - Initial Release
+1.0.0 - Initial Release

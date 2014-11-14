@@ -113,19 +113,7 @@ class agsgSettings
             'sections' => array(
                 'html-enclose' => array(
                     'title' => __('', 'plugin_textdomain'),
-                    'description' => __('<p>With this generator you can generate shortcodes that are from the most complicated to the most basic.  It was built to allow those without programming knowledge to create shortcodes in which they could have never dreamed.</p>
-                    <p>These shortcodes include those that embed videos or complete custom layouts and much much more.<br/>
-                     <strong>It does this by providing the following features for generating code:</strong>
-                      <ul class="description">
-                        <li>Add HTML attriutes to wrapper elements for enclosing shortcodes.</li>
-                        <li>Add attriutes to shortcodes which you can use for lots of different implementations.</li>
-                        <li>Allow the mapping of shortcode attributes to HTML attributes.</li>
-                        <li>Allows the overriding of the id HTML attribute and html tag name in wrapper elements for enclosed shortcodes.</li>
-                        <li>A custom implementation of <a href="http://tinymce.com/" target="_blank" title="TinyMCE">TinyMCE</a> which allows the creation of tables, divs, images, video embeds and more to add customized content that is conditionally displayed while providing a custom "attribute reference" syntax to allow you to place attributed values within the content you want conditionally displayed.</li>
-                        <li>Add conditonal statements to shortcodes so you can display additional content on a per use basis when using enclosed shortcodes or when using self closed shortcodes, replace the shortcode with content conditionally per use. The content is displayed based on the value of an attribute you set up within a condition using the AGSG. The content also may contain references to other attibutes via the "attribute reference" syntax --> "&lt;&lt;i_am_an_attribute&gt;&gt;".</li>
-                        <li>Make enclosed shortcodes process other shortcodes.</li>
-                       </ul>
-                    </p>', 'plugin_textdomain'),
+                    'description' => __('', 'plugin_textdomain'),
                     'page_slug' => $pageSlug,
                     'fields' => array(
                         array(
@@ -133,7 +121,7 @@ class agsgSettings
                             'label' => __('Shortcode Tag Name', 'plugin_textdomain'),
                             'description' => __('The shortcode tag name used to invoke the shortcode function without the "[" or "]".<br/>
                             Example Input:  my_shortcode<br/>
-                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> This will also be the name of your shortcode function generated along with the "id" of the database row this shortcode occupy\'s', 'plugin_textdomain'),
+                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> No need to worry about the underscores. All spaces are automatically replaced with them.', 'plugin_textdomain'),
                             'type' => 'text',
                             'default' => '',
                             'placeholder' => __('Ex: my_shortcode', 'plugin_textdomain')
@@ -142,7 +130,8 @@ class agsgSettings
                             'id' => 'html_tag_name',
                             'label' => __('HTML TAG Name', 'plugin_textdomain'),
                             'description' => __('The HTML tag name that content will be placed in between without the "<" and ">" symbols.<br/>
-                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> This can be overriden by creating a shotcode attribute below named "html_tag" to allow for more flexibility.  If you override this value by creating the "html_tag" attribute, make sure that you give it a default value as the generator will not use the value entered here.', 'plugin_textdomain'),
+                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> This can be overriden by creating a shotcode attribute below named "html_tag" to allow for more flexibility.  If you override this value by creating the "html_tag" attribute, make sure that you give it a default value as the generator will not use the value entered here.<br/>
+                            <span class="error dashicons dashicons-welcome-write-blog"></span><span class="important error">Very Important Note:</span> This is required even if not being creating an enclosing shortcode.  If creating a shortcode that will self-close i.e -> [short_code condition="display 2" /], then just put anything as it will be discarded.', 'plugin_textdomain'),
                             'type' => 'text',
                             'default' => '',
                             'placeholder' => __('Ex: div', 'plugin_textdomain')
@@ -158,7 +147,7 @@ class agsgSettings
                         ),
                         array(
                             'id' => 'class',
-                            'label' => __('Base Class', 'plugin_textdomain'),
+                            'label' => __('Base Classes', 'plugin_textdomain'),
                             'description' => __('The HTML tag\'s base class for hooking to with CSS or JS.<br/>
                              <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Unlike the "html_tag" override, if you create a shortcode attribute named "class" then the values entered for the shortcode attribute when used will add to the HTML "class" attribute.', 'plugin_textdomain'),
                             'type' => 'text',
@@ -181,8 +170,6 @@ class agsgSettings
                             'description' => __('You can give your HTML tag attributes.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> HTML attribute values can be set here or you can map them to shortcode attributes so that they can be set at the time of use.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> No need for an HTML "id", "class", or "style" attribute here, the HTML attributes are automatically mapped to shortcode attributes "id", "class", and "style" respectivley if they exist in <a id="has_atts_Yes-link" href="#has_atts_Yes">shortcode attributes area</a>.<br/>
-                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> The base values for "class" and "style" are set above, so this allows you to add additional classes or inline styles at the time of use.<br/>
-                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> The "id" shortcode attribute will override the "ID" field above so you can change it up at the time of use, but do note this will need a default value set, as when the "id" shortcode attribute exists the data in the "ID" field is ignored.<br/>
                             <span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You must create the shortcode attributes "id", "class", "style", or "html_tag" in the <a id="has_atts_Yes-link" href="#has_atts_Yes">shortcode attributes area</a> to use them in the shortcode.', 'plugin_textdomain'),
                             'type' => 'radio',
                             'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
@@ -224,6 +211,14 @@ class agsgSettings
                             'description' => __('You can give your shortcode if statements that perform actions depending on attribute values.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> You create the "Actions" using a TinyMCE module that allows HTML, the ability to reference the shortcode attributes created with this shortcode, and other shortcodes.<br/>
                             <span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You can reference the attributes for this shortcode in the TinyMCE editor like this "&lt;&lt;i_am_a_shortcode_att&gt;&gt;"', 'plugin_textdomain'),
+                            'type' => 'radio',
+                            'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
+                            'default' => __('No', 'plugin_textdomain')
+                        ),
+                        array(
+                            'id' => 'preview',
+                            'label' => __('Preview Generated Code', 'plugin_textdomain'),
+                            'description' => __('"Yes" should be selected if you only want to generate a preview of the code generated by this setup.', 'plugin_textdomain'),
                             'type' => 'radio',
                             'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
                             'default' => __('No', 'plugin_textdomain')

@@ -3,108 +3,8 @@
  */
 jQuery(document).ready(function ($) {
 
-    /***** Colour picker *****/
-
-    $('.colorpicker').hide();
-    $('.colorpicker').each(function () {
-        $(this).farbtastic($(this).closest('.color-picker').find('.color'));
-    });
-
-    $('.color').click(function () {
-        $(this).closest('.color-picker').find('.colorpicker').fadeIn();
-    });
-
-    $(document).mousedown(function () {
-        $('.colorpicker').each(function () {
-            var display = $(this).css('display');
-            if (display == 'block')
-                $(this).fadeOut();
-        });
-    });
-
-
-    /***** Uploading images *****/
-
-    var file_frame;
-
-    jQuery.fn.uploadMediaFile = function (button, preview_media) {
-        var button_id = button.attr('id');
-        var field_id = button_id.replace('_button', '');
-        var preview_id = button_id.replace('_button', '_preview');
-
-        // If the media frame already exists, reopen it.
-        if (file_frame) {
-            file_frame.open();
-            return;
-        }
-
-        // Create the media frame.
-        file_frame = wp.media.frames.file_frame = wp.media({
-            title: jQuery(this).data('uploader_title'),
-            button: {
-                text: jQuery(this).data('uploader_button_text'),
-            },
-            multiple: false
-        });
-
-        // When an image is selected, run a callback.
-        file_frame.on('select', function () {
-            attachment = file_frame.state().get('selection').first().toJSON();
-            jQuery("#" + field_id).val(attachment.id);
-            if (preview_media) {
-                jQuery("#" + preview_id).attr('src', attachment.sizes.thumbnail.url);
-            }
-        });
-
-        // Finally, open the modal
-        file_frame.open();
-    }
-
-    jQuery('.image_upload_button').click(function () {
-        jQuery.fn.uploadMediaFile(jQuery(this), true);
-    });
-
-    jQuery('.image_delete_button').click(function () {
-        jQuery(this).closest('td').find('.image_data_field').val('');
-        jQuery('.image_preview').remove();
-        return false;
-    });
-
-
-    /***** Navigation for settings page *****/
-
-        // Make sure each heading has a unique ID.
-    jQuery('ul#settings-sections.subsubsub').find('a').each(function (i) {
-        var id_value = jQuery(this).attr('href').replace('#', '');
-        jQuery('h3:contains("' + jQuery(this).text() + '")').attr('id', id_value).addClass('section-heading');
-    });
-
-    // Create nav links for settings page
-    jQuery('#plugin_settings .subsubsub a.tab').click(function (e) {
-        // Move the "current" CSS class.
-        jQuery(this).parents('.subsubsub').find('.current').removeClass('current');
-        jQuery(this).addClass('current');
-
-        // If "All" is clicked, show all.
-        if (jQuery(this).hasClass('all')) {
-            jQuery('#plugin_settings h3, #plugin_settings form p, #plugin_settings table.form-table, p.submit').show();
-
-            return false;
-        }
-
-        // If the link is a tab, show only the specified tab.
-        var toShow = jQuery(this).attr('href');
-
-        // Remove the first occurance of # from the selected string (will be added manually below).
-        toShow = toShow.replace('#', '', toShow);
-
-        jQuery('#plugin_settings h3, #plugin_settings form > p:not(".submit"), #plugin_settings table').hide();
-        jQuery('h3#' + toShow).show().nextUntil('h3.section-heading', 'p, table, table p').show();
-
-        return false;
-    });
-
-    /***** Custom settings for pages ****/
+    var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
+    var page = dir + 'class-agsgPlugin.php';
     var htmlTagATTList = []; // holds our html attributes
     var shortcodeTagATTList = []; // holds our shortcode attributes
     var conditionList = []; // holds our shortcode conditions
@@ -273,7 +173,7 @@ jQuery(document).ready(function ($) {
                         '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
                         '</td></tr>';
                     // action to do if true
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here <span class="error">ABOVE</span> the base content of the shortcode.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.</textarea><br><label for="description"><span class="description">This is where you can add some conditional content to appear above the normally rendered content depending on an attribute value.<br/></span></label></td></tr>';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.  Remember that you can reference any attribute named above using the shortcode attribute reference syntax.  They can be inserted anywhere you can place text in the TinyMCE editor.  Play around with it and don\'t hestistate to report a bug if you can find one.</textarea><br><label for="description"><span class="description">This is where you can add some conditional content to appear above the normally rendered content if this is an enclosing shortcode or decide what content is displayed if this is a self closing shortcode depending on an attribute value.</span></label></td></tr>';
                     // push this id into the array
                     tinyMCEids.push('shortcode_condition_' + condition_id_num + '_tinyMCE');
 
@@ -509,8 +409,6 @@ jQuery(document).ready(function ($) {
     /**
      * Begin Shortcode Generator Forms Post Code
      */
-    var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
-    var page = dir + 'class-agsgPlugin.php';
     /**
      * Begin eagsg page form
      */
@@ -663,7 +561,11 @@ jQuery(document).ready(function ($) {
         /**
          * End Validation Area
          */
-
+        // check to see if this is a preview
+        var preview = false;
+        if (jQuery('#preview_Yes').is(':checked')) {
+            preview = true;
+        }
         // no errors
         if (!err) {
             // set type of shortcode
@@ -675,7 +577,7 @@ jQuery(document).ready(function ($) {
             request = jQuery.ajax({
                 url: page,
                 type: "post",
-                data: { type: type, form_info: serializedData, matched_attributes: serializedMatchData }
+                data: { type: type, form_info: serializedData, matched_attributes: serializedMatchData, preview: preview }
             });
             // callback handler that will be called on success
             request.done(function (html, response, textStatus, jqXHR) {
@@ -728,6 +630,7 @@ function getShortcodeAttributeOptionsList(reset) {
  */
 function loadTinyMCE(selector, existing_ids) {
     if (typeof tinymce == 'undefined') {
+
         jQuery.getScript('//tinymce.cachefly.net/4/tinymce.min.js', function () {
             window.tinymce.dom.Event.domLoaded = true;
             tinymce.init({

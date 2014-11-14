@@ -3,7 +3,7 @@
 Plugin Name: A GUI Shortcode Generator Plugin
 Plugin URI:
 Description: Generates shortcodes from WordPress admin page.  Make custom shortcodes in minutes without any coding knowledge.
-Version: 0.0.1
+Version: 1.0.0
 Author: Robert Ruby II
 Author URI:
 */
@@ -172,16 +172,17 @@ class agsgPlugin
         $screen = get_current_screen();
         $help_content = '<h3>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h3>';
         $help_content .= '<ol>
-        <li>Fill in the Shortcode Tag Name field - This should be on the short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
+        <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
         <li>Fill in the HTML TAG Name field ( Read notes under fields as this can be overriden )</li>
         <li>Give your HTML element an id if you choose ( Read notes under fields as this can be overriden ).</li>
         <li>Give your HTML element some base classes if you choose.(read notes under fields as you can add to this set later using shortcode attribute "class")</li>
         <li>Give your HTML element some inline styles if you choose. (read notes under fields as you can add to this set later using shortcode attribute "style")</li>
         <li>Give your HTML element some additional attributes that you may need or require. (remember you do not need to create the HTML attributes "class", "style", or "id" - See notes under field.)</li>
         <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
-        <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content above what is wrapped, or reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each fields that has them ).</li>
-        <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.( Make sure you read the notes under each fields that has them carefully ).</li>
+        <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content above what is wrapped, or reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
+        <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.( Make sure you read the notes under each field that has them carefully ).</li>
         <li>Press "Generate Shortcode".</li>
+        </ol>
         ';
         // Add help panel
         $screen->add_help_tab(array(
@@ -192,18 +193,34 @@ class agsgPlugin
 
         $help_content = '<h3>Create a shortcode that is replaced with content. (Self-Closing)</h3>';
         $help_content .= '<ol>
-        <li>Fill in the Shortcode Tag Name field - This should be on the short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
+        <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
         <li>Fill in the HTML TAG Name field ( This is just required even if it is not going to be used - You can just put "blah" or better yet "self-closed", how about "ziptydoda" )</li>
         <li>Skip down to the describe your shortcode area.</li>
         <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
-        <li>Give your shortcode some attributes if you need them, to display conditional content and reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each fields that has them ).</li>
-        <li>Give your shortcode some conditions if you need them, to check values of attributes and display the content you want to display.( Make sure you read the notes under each fields that has them ).</li>
+        <li>Give your shortcode some attributes if you need them, to display conditional content and reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
+        <li>Give your shortcode some conditions if you need them, to check values of attributes and display the content you want to display.( Make sure you read the notes under each field that has them ).</li>
         <li>Press "Generate Shortcode".</li>
+        </ol>
         ';
         // Add help panel
         $screen->add_help_tab(array(
             'id' => 'ces',
             'title' => 'Create a shortcode that is replaced with content. (Self-Closing)',
+            'content' => $help_content,
+        ));
+
+        $help_content = '<h3>Shortcode attribute syntax explained</h3>
+        <p>The shortcode attribute syntax is based off of the same idea as the shortcodes themselves but instead of activating what is called a callback function, it just lets you embed variables within the generated shortcode functions.  What that means is when anywhere inside a TinyMCE that an attribute name is encountered in between dual less than and dual greater than signs, it replaces it with the value fed from the shortcode when used.</p>
+        <p>Here is an example assuming you have a shortcode attribute named "link_text":
+        <code>I just love all the cool design features of the &lt;&lt;link_text&gt;&gt;</code></p>
+        <p>Here is an example assuming you have a shortcode attribute named "image":
+        <code>This is the best picture I\'ve seen of the mountains &lt;&lt;image&gt;&gt;</code></p>
+        <p>In both of these examples the attribute names and the "<" ">" signs will be replaced with what ever value the attributes are equal to when using the shortcode they were created with.</p>
+        ';
+        // Add help panel
+        $screen->add_help_tab(array(
+            'id' => 'sase',
+            'title' => 'Shortcode attribute syntax explained',
             'content' => $help_content,
         ));
     }
