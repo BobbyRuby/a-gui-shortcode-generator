@@ -11,22 +11,14 @@
  * Network: true
  * License: See Envato for details
  */
-error_reporting(E_ERROR);
-// if not accessed by a post from this form
-if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
-    // make sure it wasn't accessed directly
-    if (!defined('ABSPATH')) exit;
-    register_activation_hook(__FILE__, array('agsgPlugin', 'install')); // install plugin on activation
-    add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
-    add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
-} else if ($_POST['form_info']) {
-//    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
-    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
+
+if ($_POST['form_info']) {
+    $wp_load = agsgPlugin::get_wp_load_path();
+    require_once($wp_load);
     include_once('class-agsgShortcodeGenerator.php');
     include_once('class-agsgShortcode.php');
     include_once('agsg-concrete-creator-classes.php');
     include_once('agsg-concrete-product-classes.php');
-
     // grab serialized data
     parse_str($_POST['form_info'], $inputs);
     parse_str($_POST['matched_attributes'], $matched_atts);
@@ -62,7 +54,7 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     }
     // get kind
     $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
-
+    echo 'what the fuck';
     if ($kind === 'ATT') {
         $shortcode = new agsgATTgenerator();
         $shortcode->generateShortcode($args);
@@ -71,8 +63,16 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
         $shortcode->generateShortcode($args);
     } else {
     }
+
     exit;
-}
+} else // if not accessed by a post from this form
+    if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
+        // make sure it wasn't accessed directly
+        if (!defined('ABSPATH')) exit;
+        register_activation_hook(__FILE__, array('agsgPlugin', 'install')); // install plugin on activation
+        add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
+        add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
+    }
 error_reporting(E_ALL);
 include_once('agsg_shortcodes.php');
 include_once('class-agsgSettings.php');
@@ -264,6 +264,27 @@ class agsgPlugin
             die();
         }
     }
+
+    /**
+     * http://stackoverflow.com/questions/2354633/wordpress-root-directory-path
+     * @return bool|mixed|string
+     */
+    public static function get_wp_load_path()
+    {
+        $base = dirname(__FILE__);
+        $path = false;
+
+        if (@file_exists(dirname(dirname($base)) . "/wp-load.php")) {
+            $path = dirname(dirname($base)) . "/wp-load.php";
+        } else
+            if (@file_exists(dirname(dirname(dirname($base))) . "/wp-load.php")) {
+                $path = dirname(dirname(dirname($base))) . "/wp-load.php";
+            } else
+                $path = false;
+
+        if ($path != false) {
+            $path = str_replace("\\", "/", $path);
+        }
+        return $path;
+    }
 }
-
-
