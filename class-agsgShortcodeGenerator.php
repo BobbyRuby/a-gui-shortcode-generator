@@ -30,37 +30,101 @@ abstract class agsgShortcodeGenerator
 
         if (!$atts) $atts = array();
 
-        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $preview, $regenerate);
+        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions);
         if ($preview)
             $this->shortcode->preview = $preview;
         if ($regenerate)
             $this->shortcode->regenerate = $regenerate;
+        $this->setTagExists();
 
         $this->shortcode->filename = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
 
+//        agsgPlugin::rfd_debugger($this->shortcode,1);
+
         if ($this->shortcode->preview) { // if this is a preview
             $this->print_shortcode_msg('preview');
-        } else if ($this->shortcode->regenerate) { // are we regenerating?
-            $this->regenerate_shortcode_code();
+        } else if ($this->shortcode->regenerate && $this->shortcode->exists) { // are we regenerating?  is must exist to regenerate
             $this->update_shortcode();
-            $this->add_shortcode_to_file();
-            $this->print_shortcode_msg();
+            if ($this->shortcode->error) {
+                $this->print_error_data('update_db');
+            } else {
+                $this->regenerate_shortcode_code(); // calls add to file
+                $this->print_shortcode_msg();
+            }
+        } else if ($this->shortcode->regenerate && !$this->shortcode->exists) { // are we regenerating?  is must exist to regenerate
+            $this->shortcode->error_msg = 'Not Shortcode exists with the tag ' . $this->shortcode->tag;
+            $this->shortcode->error = true;
+            $this->print_error_data('regen_not_possible');
         } else if (!$this->shortcode->exists) { // if one exists and there is a regen is set still add to file
-            $this->add_shortcode_to_file();
-            $this->print_shortcode_msg();
+            $this->logShortcodeToDatabase();
+            if ($this->shortcode->error) {
+                $this->print_error_data('add_db');
+            } else {
+                $this->add_shortcode_to_file();
+                $this->print_shortcode_msg();
+            }
         } else { // one exists but not regen
             $this->print_error_data('exists');
         }
 
     }
 
+    private function logShortcodeToDatabase()
+    {
+        if (!$this->shortcode->preview && !$this->shortcode->regenerate) { // only create new row if not previewing or regenerating
+            global $wpdb;
+            $date = date('Y-m-d H:i:s');
+            $table = $wpdb->prefix . 'agsg_shortcodes';
+            $wpdb->insert($table,
+                array( // columns
+                    'type' => $this->shortcode->type,
+                    'name' => $this->shortcode->name,
+                    'kind' => $this->shortcode->kind,
+                    'tag' => $this->shortcode->tag,
+                    'example' => $this->shortcode->example,
+                    'code' => $this->shortcode->shortcode_code,
+                    'created_datetime' => $date,
+                ),
+                array( // formats
+                    '%s',
+                    '%s',
+                    '%s',
+                    '%s',
+                    '%s',
+                    '%s',
+                    '%s',
+                )
+            );
+            if ($wpdb->last_error) {
+                $this->shortcode->error = true;
+                $this->shortcode->error_msg = $wpdb->last_error;
+            } else {
+                $this->shortcode->error = false;
+            }
+        }
+    }
+
+    private function setTagExists()
+    {
+        global $wpdb;
+        $tag = $this->shortcode->tag;
+        $exists = $wpdb->get_row("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes WHERE tag = '$tag'");
+        $this->tag = $tag;
+        if (!$exists == null) {
+            $exists = true;
+            $this->shortcode->error = true;
+            $this->shortcode->error_msg = 'A shortcode with the tag "' . $tag . '" already exists!';
+        }
+        $this->shortcode->exists = $exists;
+    }
+
     private function regenerate_shortcode_code()
     {
-        $source_file = file_get_contents($this->shortcode->fileName);
+        $source_file = file_get_contents($this->shortcode->filename);
         $source = preg_replace('/(\/\/' . $this->shortcode->tag . ')(.*)(\/\/' . $this->shortcode->tag . ')/s', "", $source_file);
-        file_put_contents($this->shortcode->fileName, $source);
+        file_put_contents($this->shortcode->filename, $source);
         echo 'Old Shortcode code deleted from file....<br>';
-        agsgPlugin::addShortcodeToFile($this->shortcode->tag, $this->shortcode->shortcode_code);
+        $this->add_shortcode_to_file();
     }
 
     private function update_shortcode()
@@ -84,7 +148,13 @@ abstract class agsgShortcodeGenerator
             ),
             array('%s')
         );
-        echo 'Shorcode database row updated for ' . $this->shortcode->tag . '...';
+        if ($wpdb->last_error) {
+            $this->shortcode->error = true;
+            $this->shortcode->error_msg = $wpdb->last_error;
+        } else {
+            $this->shortcode->error = false;
+            echo 'Shorcode database row updated for ' . $this->shortcode->tag . '...';
+        }
     }
 
     private function add_shortcode_to_file()
@@ -98,7 +168,7 @@ abstract class agsgShortcodeGenerator
     private function print_shortcode_msg($type = '')
     {
         if ($type === 'preview') {
-            $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you may want to create with AGSG</h3>';
+            $html = '<h3>Preview details about the shortcode specifications above for "' . $this->shortcode->name . '", you may want to create with AGSG</h3>';
             $html .= '<h4>The code for this shortcode will be added to file located at:</h4>
             <i>"' . $this->shortcode->filename . '"</i><br/>';
             $html .= '<h4>The code generated and that will be added to the file above by AGSG...</h4>
@@ -106,7 +176,7 @@ abstract class agsgShortcodeGenerator
             $html .= '<h4>An Example of how to use the shortcode you may create...</h4>
             <i>"' . $this->shortcode->example . '"</i><br/>';
         } else {
-            $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you just created with AGSG</h3>';
+            $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '"</h3>';
             $html .= '<h4>The code for this shortcode was added to file located at:</h4>
             <i>"' . $this->shortcode->filename . '"</i><br/>';
             $html .= '<h4>The code generated and added to the file above by AGSG...</h4>
@@ -120,8 +190,9 @@ abstract class agsgShortcodeGenerator
     private function print_error_data($err_type)
     {
         global $wpdb;
-        $html = '<h3>' . $this->shortcode->error . '</h3>';
+        $html = '<h3>' . $this->shortcode->error_msg . '</h3>';
         if ($err_type === 'exists') {
+            $html .= '<p>Please review the information below.  If you want to regereate this shortcode, select the "Yes" radio option above for the field "Regnerate Code".<p>';
             // get old shortcode for quick comparison
             $table = $wpdb->prefix . 'agsg_shortcodes';
             $sql = $wpdb->prepare(
@@ -129,76 +200,15 @@ abstract class agsgShortcodeGenerator
                 $this->shortcode->tag
             );
             $oldshortcode_code = $wpdb->get_var($sql);
-            $html .= '<form id="regen" method="post">';
             $html .= '<h4><label for="tag">Shortcode Tag</label></h4><input id="tag" name="tag" type="text" value="' . $this->shortcode->tag . '" readonly />';
             $html .= '<h4><label for="old_shortcode">Old Shortcode Code</label></h4><textarea id="old_shortcode" readonly="readonly">' . $oldshortcode_code . '</textarea>';
             $html .= '<h4><label for="new_shortcode">Preview of Replacement Code for Shortcode if Regenerated</label></h4><textarea id="new_shortcode" name="new_code" readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
-            $html .= $this->getOverwriteShortcodeButton();
-            $html .= '</form>';
-            /**
-             * Begin eagsg page regen form
-             */
-            $script = <<<SCRIPT
-            <script type="text/javascript">
-            var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
-            var page = dir + 'class-agsgPlugin.php';
-            var regenRequest = '';
-            jQuery("#regen").submit(function (event) {
-                // prevent default posting of form
-                event.preventDefault();
-                // abort any pending regenRequest
-                if (regenRequest) {
-                    regenRequest.abort();
-                }
-                // setup some local variables
-                var form = jQuery(this);
-                // let's select and cache all the fields
-                var inputs = jQuery(form).find("input, select, button, textarea");
-                // serialize the data in the form
-                var serializedData = jQuery(form).serialize();
-
-                // let's disable the inputs for the duration of the ajax regenRequest
-                jQuery(inputs).prop("disabled", true);
-                // fire off the regenRequest
-                regenRequest = jQuery.ajax({
-                    url: page,
-                    type: "post",
-                    data: { shortcode_rewrite: serializedData }
-                });
-                // callback handler that will be called on success
-                regenRequest.done(function (html, response, textStatus, jqXHR) {
-                    // output shortcode information
-                    jQuery('#agsg_shortcode_preview').append(html);
-                });
-                // callback handler that will be called on failure
-                regenRequest.fail(function (jqXHR, textStatus, errorThrown) {
-                    // log the error to the console
-                    console.error(
-                        "The following error occured: " +
-                        textStatus, errorThrown
-                    );
-                });
-                // if the regenRequest failed or succeeded
-                regenRequest.always(function () {
-                    // reenable the inputs
-                    jQuery(inputs).prop("disabled", false);
-                });
-
-    });
-    </script>
-SCRIPT;
-            /**
-             * End eagsg page regen form
-             */
-
+        } else if ($err_type === 'add_db') {
+        } else if ($err_type === 'update_db') {
+        } else if ($err_type === 'regen_not_possible') {
+            $html .= '<p>Please select the "No" radio option above for the field "Regnerate Code" or check the tag entered above as the tag "' . $this->shortcode->tag . '" does not exist.<p>';
         }
         echo $html;
-        echo $script;
-    }
-
-    private function getOverwriteShortcodeButton()
-    {
-        return '<input type="submit" value="Delete old code and Regenerate Shortcode to above Specifications" class="button-primary" name="submit_agsg_regen">';
     }
 
     /**
@@ -230,9 +240,7 @@ SCRIPT;
      * @param array $atts - Multideminsional array containing shortcode attribute names and default values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
      * @param array $mapped_atts - Multideminsional array containing html tag and shortcode attribute names that have been matched up or 'mapped' - array( 'match_html_att_names' => array( name0, name1, name2 ) , 'match_shortcode_att_names' => array( 'value0', value1', value2'  ) );
      * $param array $conditions - Multimdeminsional array containing conditions data
-     * $param bool  $preview - If flagged will only generate a preview
-     * $param bool  $regenerate - If flagged, this will update the shortcode tag fed.
      * @return mixed
      */
-    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $preview, $regenerate); // the factory method to be implemented by concrete creator classes
+    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions); // the factory method to be implemented by concrete creator classes
 }

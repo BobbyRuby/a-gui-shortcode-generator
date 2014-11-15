@@ -70,10 +70,10 @@ class agsgATT extends agsgShortcode
  $filtered_html_att_names[$i]="'.
 STRING;
                 $match_str .= <<<'VARSTR'
-$a['
+isset($a['
 VARSTR;
                 $match_str .= <<<STRING
-$filtered_shortcode_att_names[$i]'].'"
+$filtered_shortcode_att_names[$i]']).'"
 STRING;
                 $att_match_str .= $match_str;
             }
@@ -105,7 +105,7 @@ VARSTR;
             // is their an override for the html tag
             if ($this->htmlTagOR) {
                 $this->shortcode_code .= <<<'VARSTR'
-'<'.$a['html_tag'].
+'<'.isset($a['html_tag']).
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
@@ -115,7 +115,7 @@ STRING;
             // is their an override for the id
             if ($this->html_id_OR) {
                 $this->shortcode_code .= <<<'VARSTR'
-' id="'.$a['id'].
+' id="'.isset($a['id']).
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
@@ -128,14 +128,14 @@ STRING;
 STRING;
             // add attributed classes
             $this->shortcode_code .= <<<'VARSTR'
- .$a['class'].'"
+ .isset($a['class']).'"
 VARSTR;
             // add static and attributed inline_style
             $this->shortcode_code .= <<<STRING
  style="$inlineStyle
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
- '.$a['style'].'"
+ '.isset($a['style']).'"
 VARSTR;
             // add in the html attributes where values have NOT been mapped to shortcode attributes
             $this->shortcode_code .= <<<STRING
@@ -168,63 +168,14 @@ EOD;
                     $tinyMCE = $condition["tinyMCE"];
                     // parse tiny mce content and find references to attributes
                     foreach ($att_names as $att_name) {
+                        // if attributes exist
                         if (strpos($tinyMCE, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
-                            $tinyMCE_re = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', '$a[\'' . $att_name . '\']', $tinyMCE);
-                            $after_replace = explode(' ', $tinyMCE_re);
-                            // cycle through all the pieces so we can add this referenced att to the array
-                            foreach ($after_replace as $iv) {
-                                // if this is an attribute
-                                $pos = strpos($iv, 'a[\'');
-                                if ($pos !== false) {
-                                    // check to see if this att ref was at the end of an html element
-                                    $pos = strpos($iv, '</');
-                                    if ($pos !== false) {
-                                        $iv = preg_replace('/([<\/a-z>]+)$/', '', $iv); // replace html element within $iv to keep variable string intact
-                                        // replace crap that happens when link added at end of an html element
-                                        $iv = preg_replace('/(&lt;&lt;[a-z_0-9]+&gt;&gt;)/', '', $iv);
-                                        $iv = '$a' . preg_replace('/(>\$[a-z_0-9]+)/', '', $iv);
-                                    }
-                                    // check for link
-                                    $pos = strpos($iv, 'href=');
-                                    if ($pos !== false) {
-                                        $iv = str_replace('href=', '', $iv);
-                                        $iv = str_replace('"', '', $iv);
-                                    }
-                                    // check for link title
-                                    $pos = strpos($iv, 'title=');
-                                    if ($pos !== false) {
-                                        $iv = str_replace('title=', '', $iv);
-                                        $iv = str_replace('"', '', $iv);
-                                    }
-                                    // check for image src
-                                    $pos = strpos($iv, 'src=');
-                                    if ($pos !== false) {
-                                        $iv = str_replace('src=', '', $iv);
-                                        $iv = str_replace('"', '', $iv);
-                                    }
-                                    // check for image alt
-                                    $pos = strpos($iv, 'alt=');
-                                    if ($pos !== false) {
-                                        $iv = str_replace('alt=', '', $iv);
-                                        $iv = str_replace('"', '', $iv);
-                                    }
-                                    // check for image crazy attribute problem
-                                    $pos = strpos($iv, '&lt;&lt;');
-                                    if ($pos !== false) {
-                                        $iv = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', '', $iv);
-                                        $iv = str_replace('>', '', $iv);
-                                        $iv = str_replace('"', '', $iv);
-                                    }
-                                    // check for link target
-                                    $pos = strpos($iv, 'target=');
-                                    if ($pos !== false) {
-                                        $iv = preg_replace('/(target=.+["])/', '', $iv);
-                                    }
-                                    // iv should not have an $a so it should be taken off
-                                    $pos = strpos($iv, '$a$a');
-                                    if ($pos !== false) {
-                                        $iv = str_replace('$a$a', '$a', $iv);
-                                    }
+                            // get an array of just attributes to work with
+                            preg_match('/(\&lt\;\&lt\;[a-z_-]+\&gt\;\&gt\;)/', $tinyMCE, $matches);
+                            // cycle through each, create var = value string, and add to array
+                            if (is_array($matches)) {
+                                foreach ($matches as $iv) {
+                                    $iv = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', '$a[\'' . $att_name . '\']', $iv);
                                     $ref_atts[] = "$$att_name = $iv";
                                 }
                             }
@@ -272,10 +223,6 @@ VARSTR;
 add_shortcode( '$tag', '$this->name' );
 //$tag
 STRING;
-        if (!$this->tagExists($tag)) {
-            // log the shortcode to the db
-            $this->logShortcodeToDatabase();
-        }
     }
 
     public function generateExample()
@@ -285,7 +232,7 @@ STRING;
             $example .= "$a=\"$dv\" ";
         }
         $example .= "]Some shortcode content.[/$this->tag]<br/>";
-        $example .= "Self Closing Example[$this->tag ";
+        $example .= "Self Closing Example -- [$this->tag ";
         foreach ($this->shortcode_atts as $a => $dv) {
             $example .= "$a=\"$dv\" ";
         }
@@ -361,10 +308,6 @@ $htmletg";
 add_shortcode( '$tag', '$this->name' );
 //$tag
 EOD;
-        if (!$this->tagExists($tag)) {
-            // log the shortcode to the db
-            $this->logShortcodeToDatabase();
-        }
     }
 
     public function generateExample()

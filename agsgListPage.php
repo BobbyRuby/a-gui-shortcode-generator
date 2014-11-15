@@ -53,12 +53,6 @@ class agsg_shortcode_table extends agsg_WP_List_Table
     {
         return $item[$column_name];
     }
-
-    function column_description($item)
-    {
-        return nl2br($item['description']);
-    }
-
     /** ************************************************************************
      * Recommended. This is a custom column method and is responsible for what
      * is rendered in any column with a name/slug of 'title'. Every time the class
@@ -75,22 +69,22 @@ class agsg_shortcode_table extends agsg_WP_List_Table
      * @param array $item A singular item (one full row's worth of data)
      * @return string Text to be placed inside the column <td> (movie title only)
      **************************************************************************/
-    function column_task_name($item)
+    function column_name($item)
     {
-        //Build row actions
-//        $actions = array(
-//            'edit'      => sprintf('<a href="?page=%s&action=%s&movie=%s">Edit</a>',$_REQUEST['page'],'edit',$item['id']),
-//            'delete'    => sprintf('<a href="?page=%s&action=%s&movie=%s">Delete</a>',$_REQUEST['page'],'delete',$item['id']),
-//        );
-
         //Return the title contents
         return sprintf('<span id="list_name_%2$s">%1$s</span> <span id="list_id_%2$s" style="color:silver">(id:%2$s)</span>',
             /*$1%s*/
-            $item['task_name'],
+            $item['name'],
             /*$2%s*/
             $item['id']
 //            /*$3%s*/ $this->row_actions($actions)
         );
+    }
+
+    function column_code($item)
+    {
+        $data = preg_replace('/[<]/', '&lt;', $item['code']);
+        return '<textarea readonly>' . $data . '</textarea>';
     }
 
     /** ************************************************************************
@@ -134,7 +128,7 @@ class agsg_shortcode_table extends agsg_WP_List_Table
             'name' => 'Function Name',
             'tag' => 'Tag Name',
             'kind' => 'Kind',
-            'description' => 'Description',
+//            'description' => 'Description',  taken out of list page because it is in code block in the list page
             'example' => 'Example',
             'code' => 'Code',
             'created_datetime' => 'Created Datetime'
@@ -211,11 +205,15 @@ class agsg_shortcode_table extends agsg_WP_List_Table
 
     function get_shortcodes($order_params = false)
     {
+        global $wpdb;
         if ($order_params) {
-
+            $orderby = $order_params['orderby'];
+            $order = $order_params['order'];
+            $shortcodes = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes ORDER BY $orderby $order", ARRAY_A);
         } else {
-
+            $shortcodes = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes", ARRAY_A);
         }
+        return $shortcodes;
     }
 
     /** ************************************************************************
@@ -321,17 +319,30 @@ class agsg_shortcode_table extends agsg_WP_List_Table
  * Now we just need to define an admin page. For this example, we'll add a top-level
  * menu item to the bottom of the admin menus.
  */
-function shortcode_add_menu_items()
+function agsg_shortcode_add_menu_items()
 {
     global $shortcode_page;
-    $shortcode_page = add_management_page('AGSG Shortcode List', 'AGSG Shortcode List', 'manage_options', 'shortcode_list', 'shortcode_render_list_page');
-    add_action("load-$shortcode_page", "shortcode_page_screen_options");
+    $shortcode_page = add_management_page('AGSG Shortcode List', 'AGSG Shortcode List', 'manage_options', 'shortcode_list', 'agsg_shortcode_render_list_page');
+    add_action("load-$shortcode_page", "agsg_shortcode_page_screen_options");
+    add_action('admin_print_styles-' . $shortcode_page, 'agsg_shortcode_list_css_enqueue');
+    add_action('admin_print_scripts-' . $shortcode_page, 'agsg_shortcode_list_js_enqueue');
+}
 
+function agsg_shortcode_list_css_enqueue()
+{
+    $assets_url = esc_url(trailingslashit(plugins_url('/assets/', __FILE__)));
+    wp_enqueue_style('agsg-list-page-css', $assets_url . 'css/list-page.css');
+}
+
+function agsg_shortcode_list_js_enqueue()
+{
+    $assets_url = esc_url(trailingslashit(plugins_url('/assets/', __FILE__)));
+    wp_enqueue_script('agsg-list-page-js', $assets_url . 'js/list-page.js');
 }
 
 /***************************** SCREEN OPTIONS ********************************
  ********************************************************************************/
-function shortcode_page_screen_options()
+function agsg_shortcode_page_screen_options()
 {
     global $shortcode_page;
     $screen = get_current_screen();
@@ -347,7 +358,7 @@ function shortcode_page_screen_options()
     add_screen_option('per_page', $args);
 }
 
-function shortcode_per_page_set_screen_option($status, $option, $value)
+function agsg_shortcode_per_page_set_screen_option($status, $option, $value)
 {
     if ('shortcode_per_page' == $option) return $value;
 }
@@ -360,7 +371,7 @@ function shortcode_per_page_set_screen_option($status, $option, $value)
  * so we've instead called those methods explicitly. It keeps things flexible, and
  * it's the way the list tables are used in the WordPress core.
  */
-function shortcode_render_list_page()
+function agsg_shortcode_render_list_page()
 {
     global $current_user;
     //Create an instance of our package class...

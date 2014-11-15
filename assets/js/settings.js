@@ -318,6 +318,12 @@ jQuery(document).ready(function ($) {
                 '<label for="default"><span class="description">The default value for the attribute.</span></label>' +
                 '</td></tr>';
             jQuery(this).parent().parent().parent().after(html);
+            // listen for shortcode attributes to keep input valid
+            jQuery('[name="agsg_att_name[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '_', 'gi');
+                jQuery(this).val(val);
+            });
             jQuery('[for="att_name"] .dashicons-dismiss').click(function (e) {
                 if (window.confirm("You will lose this attribute, you must reset attribute mapping if set already, and if you were using this for a condition you need to delete is as well.  Continue?")) {
                     if (serializedMatchData.length) serializedMatchData = 0;
@@ -438,6 +444,8 @@ jQuery(document).ready(function ($) {
         var has_conditions_Yes = jQuery('#has_conditions_Yes').is(':checked');
         var has_atts_No = jQuery('#has_atts_No').is(':checked');
         var inline_styles = jQuery('#inline_styles');
+        var preview = jQuery('#preview_Yes');
+        var regenerate = jQuery('#regenerate_Yes');
 
         var has_atts = jQuery('[name="agsg_has_atts"]'); // not used for validation check but to set the error msg
         var err = false;
@@ -553,19 +561,31 @@ jQuery(document).ready(function ($) {
         if (has_conditions_Yes && has_atts_No) {
             jQuery(has_atts).parent().parent().addClass('form-invalid');
             jQuery(has_atts).parent().find('.error').remove();
-            jQuery('#has_atts_Yes').parent().prepend('<span class="error">Must have attributes to use the conditionals.</span>'); // added to only the yes to prevent duplicate msg
+            jQuery('#has_atts_Yes').parent().prepend('<span class="error">Must have attributes to use the conditionals.</span>');
             err = true;
         } else {
             jQuery(has_atts).parent().parent().removeClass('form-invalid').find('.error').remove();
         }
+        // if there are a preview and regenerate flag error out
+        if (preview.is(':checked') && regenerate.is(':checked')) {
+            jQuery(preview).parent().parent().find('.error').remove();
+            preview.parent().prepend('<span class="error">Must NOT have both flags set.</span>');
+            jQuery(regenerate).parent().parent().find('.error').remove();
+            regenerate.parent().prepend('<span class="error">Must NOT have both flags set.</span>');
+            jQuery(preview).parent().parent().parent().addClass('form-invalid');
+            jQuery(regenerate).parent().parent().parent().addClass('form-invalid');
+            err = true;
+        } else {
+            jQuery(preview).parent().parent().find('.error').remove();
+            jQuery(preview).parent().parent().parent().removeClass('form-invalid');
+            jQuery(regenerate).parent().parent().find('.error').remove();
+            jQuery(regenerate).parent().parent().parent().removeClass('form-invalid');
+        }
         /**
          * End Validation Area
          */
-        // check to see if this is a preview
-        var preview = false;
-        if (jQuery('#preview_Yes').is(':checked')) {
-            preview = true;
-        }
+
+
         // no errors
         if (!err) {
             // set type of shortcode if you wish to extend it to do more.

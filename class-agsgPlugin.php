@@ -2,32 +2,23 @@
 /**
  * Plugin Name: A GUI Shortcode Generator Plugin
  * Plugin URI:
- * Description: Generates shortcodes from WordPress admin page.  Make custom shortcodes in minutes without any coding knowledge.
+ * Description: Generates shortcodes from WordPress admin page.  Make REAL custom shortcodes in minutes without any coding knowledge.
  * Version: 1.0.0
  * Author: Robert Ruby II
  * Author URI:
- * Text Domain: Not Yet Implemented.
+ * Text Domain: Not Yet Implemented as of v1.0.0
  * Domain Path: N/A
  * Network: true
  * License: See Envato for details
  */
 error_reporting(E_ERROR);
 // if not accessed by a post from this form
-if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['shortcode_rewrite']) {
+if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
     // make sure it wasn't accessed directly
     if (!defined('ABSPATH')) exit;
     register_activation_hook(__FILE__, array('agsgPlugin', 'install')); // install plugin on activation
     add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
     add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
-} else if ($_POST['shortcode_rewrite']) {
-//    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
-//    // grab serialized data
-//    parse_str($_POST['shortcode_rewrite'], $inputs);
-//    $tag = $inputs['tag'];
-//    $new_code = $inputs['new_code'];
-//    $new_code = str_replace("\\'", "'", $new_code);
-//    agsgPlugin::deleteShortcode($tag, $new_code);
-//    exit;
 } else if ($_POST['form_info']) {
 //    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
     require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
@@ -56,9 +47,9 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['short
     $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
     $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
 
-    $args['preview'] = $inputs['preview'];
-    $args['regenerate'] = $inputs['regenerate'];
-
+    $args['preview'] = ($inputs['agsg_preview'] === 'Yes') ? true : false;
+    $args['regenerate'] = ($inputs['agsg_regenerate'] === 'Yes') ? true : false;
+//    agsgPlugin::rfd_debugger($args,1);
     // grab all conditions on the screen and create an array for each one that contains only the data for it if conditions exist
     if ($inputs['agsg_has_conditions'] === 'Yes') {
         for ($i = 0; $i < count($inputs['agsg_shortcode_condition_type']); $i++) {
@@ -103,8 +94,8 @@ class agsgPlugin
         // actions and filters
         add_action('current_screen', array($this, 'addHelp'));
         // in agsgListPage.php
-        add_action('admin_menu', 'shortcode_add_menu_items');
-        add_filter('set-screen-option', 'shortcode_per_page_set_screen_option', 10, 3);
+        add_action('admin_menu', 'agsg_shortcode_add_menu_items');
+        add_filter('set-screen-option', 'agsg_shortcode_per_page_set_screen_option', 10, 3);
         /**
          * Use this for debugging
          */
@@ -121,7 +112,8 @@ class agsgPlugin
 
     public static function install()
     {
-        add_option('agsgPlugin', 'agsg');
+        add_option('agsgPlugin', 'agsg'); // for one time stuff after activation
+        add_option('agsgPluginVersion', '1.0.0'); // for version number and updates
         /* activation code here */
         global $wpdb;
         // task_types Table - Used to hold all task types available in the system that can be assigned to jobs.  GREEN LIGHTED
@@ -153,7 +145,7 @@ class agsgPlugin
     public static function addHelp()
     {
         $screen = get_current_screen();
-        if ($screen->id === 'settings_page_eagsg') {
+        if ($screen->id === 'tools_page_eagsg') {
             $help_content = '<h3>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h3>';
             $help_content .= '<ol>
             <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>

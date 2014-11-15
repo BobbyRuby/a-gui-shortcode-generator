@@ -18,6 +18,7 @@ class agsgATTgenerator extends agsgShortcodeGenerator
          * I choose just a non attributed and attributed but it could be different
          */
         $shortcode = new agsgATT($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description);
+        $shortcode->type = $type;
         return $shortcode;
     }
 }
@@ -39,6 +40,7 @@ class agsgNonATTgenerator extends agsgShortcodeGenerator
         $htmlstg = $htmlTag[0];
         $htmletg = $htmlTag[1];
         $shortcode = new agsgNonATTenclosed($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class);
+        $shortcode->type = $type;
         return $shortcode;
     }
 }

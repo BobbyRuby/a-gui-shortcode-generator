@@ -9,7 +9,6 @@
 abstract class agsgShortcode
 {
     public $shortcode_code;
-    public $dbid;
     public $type;
     public $name;
     public $kind;
@@ -25,58 +24,9 @@ abstract class agsgShortcode
     public $shortcodes_atts_str; // contains all attributes for this shortcode
     public $shortcode_atts; // contains all attributes for this shortcode
     public $error;
+    public $error_msg;
     public $preview;
     public $regenerate;
-
-    public function logShortcodeToDatabase()
-    {
-        global $wpdb;
-        $date = date('Y-m-d H:i:s');
-        $table = $wpdb->prefix . 'agsg_shortcodes';
-        $wpdb->insert($table,
-            array( // columns
-                'type' => $this->type,
-                'name' => $this->name,
-                'kind' => $this->kind,
-                'tag' => $this->tag,
-                'example' => $this->example,
-                'code' => $this->shortcode_code,
-                'created_datetime' => $date,
-            ),
-            array( // formats
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-            )
-        );
-        // set the dbid
-        $this->dbid = $wpdb->insert_id;
-        if ($wpdb->last_error) {
-            $this->error = $wpdb->last_error;
-        }
-    }
-
-    /**
-     * Query wpdb for row with that tag
-     * if row exists return true
-     * if it doesn't return false
-     */
-    public function tagExists($tag)
-    {
-        global $wpdb;
-        $exists = $wpdb->get_row("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes WHERE tag = '$tag'");
-        $this->tag = $tag;
-        if (!$exists == null) {
-            $exists = true;
-            $this->error = 'A shortcode with the tag "' . $this->tag . '" already exists!';
-        }
-        $this->exists = $exists;
-        return $exists;
-    }
 
     abstract public function generateExample();
 
