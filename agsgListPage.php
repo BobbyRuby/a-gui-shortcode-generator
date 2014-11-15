@@ -196,11 +196,22 @@ class agsg_shortcode_table extends agsg_WP_List_Table
         //Detect when a bulk action is being triggered...
         if ('delete_selected' === $this->current_action() && $_GET['shortcode']) {
             foreach ($_GET['shortcode'] as $id) {
-                rpm_delete_shortcode($id);
+                $this->delete_shortcode($id);
             }
-        } elseif ('edit_selected' === $this->current_action() && $_GET['shortcode']) {
-            $this->display_edit_form($_GET['shortcode']);
         }
+    }
+
+    function delete_shortcode($id)
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'agsg_shortcodes';
+        $row = $wpdb->get_row("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes WHERE id = '$id'");
+        $tag = $row->tag;
+        $wpdb->delete($table, array('id' => $id));
+        $filename = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
+        $source_file = file_get_contents($filename);
+        $source = preg_replace('/(\/\/' . $tag . ')(.*)(\/\/' . $tag . ')/s', "", $source_file);
+        file_put_contents($filename, $source);
     }
 
     function get_shortcodes($order_params = false)
@@ -378,5 +389,14 @@ function agsg_shortcode_render_list_page()
     $shortcode_list_table = new agsg_shortcode_table();
     //Fetch, prepare, sort, and filter our data...
     $shortcode_list_table->prepare_items();
-    $shortcode_list_table->display();
+    ?>
+    <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
+    <form id="shortcodes_filter" method="get">
+        <!-- For plugins, we also need to ensure that the form posts back to our current page -->
+        <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>"/>
+        <?php
+        $shortcode_list_table->display();
+        ?>
+    </form>
+<?php
 }

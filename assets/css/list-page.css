@@ -1,3 +1,7 @@
 .column-code textarea {
     width: 100%;
 }
+
+span.error {
+    color: red;
+}
