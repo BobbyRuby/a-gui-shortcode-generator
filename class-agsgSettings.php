@@ -49,7 +49,7 @@ class agsgSettings
     {
         (!$this->settings) ? $settings = $this->settings_fields() : $settings = $this->settings;
         foreach ($settings as $page) {
-            $pageHook = add_management_page(__($page['title'], 'plugin_textdomain'), __($page['title'], 'plugin_textdomain'), 'manage_options', $page['slug'], array($this, $page['slug'] . '_settings_page'));
+            $pageHook = add_menu_page(__($page['title'], 'plugin_textdomain'), __($page['title'], 'plugin_textdomain'), 'manage_options', $page['slug'], array($this, $page['slug'] . '_settings_page'));
             add_action('admin_print_styles-' . $pageHook, array($this, 'settings_CSS_assets'));
             add_action('admin_print_scripts-' . $pageHook, array($this, 'settings_JS_assets'));
             $this->pageHooks[] = $pageHook;

@@ -1,0 +1,3 @@
+#toplevel_page_eagsg .dashicons-admin-generic:before, #toplevel_page_shortcode_list .dashicons-admin-generic:before {
+    content: "[]"
+}

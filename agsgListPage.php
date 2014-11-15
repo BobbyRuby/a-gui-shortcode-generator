@@ -333,7 +333,7 @@ class agsg_shortcode_table extends agsg_WP_List_Table
 function agsg_shortcode_add_menu_items()
 {
     global $shortcode_page;
-    $shortcode_page = add_management_page('AGSG Shortcode List', 'AGSG Shortcode List', 'manage_options', 'shortcode_list', 'agsg_shortcode_render_list_page');
+    $shortcode_page = add_menu_page('AGSG Shortcode List', 'AGSG Shortcode List', 'manage_options', 'shortcode_list', 'agsg_shortcode_render_list_page');
     add_action("load-$shortcode_page", "agsg_shortcode_page_screen_options");
     add_action('admin_print_styles-' . $shortcode_page, 'agsg_shortcode_list_css_enqueue');
     add_action('admin_print_scripts-' . $shortcode_page, 'agsg_shortcode_list_js_enqueue');

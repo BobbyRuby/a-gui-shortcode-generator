@@ -93,6 +93,7 @@ class agsgPlugin
         $settings = new agsgSettings(__FILE__); // adds own menu item
         // actions and filters
         add_action('current_screen', array($this, 'addHelp'));
+        add_action('admin_print_styles', array($this, 'iconCss'));
         // in agsgListPage.php
         add_action('admin_menu', 'agsg_shortcode_add_menu_items');
         add_filter('set-screen-option', 'agsg_shortcode_per_page_set_screen_option', 10, 3);
@@ -140,6 +141,12 @@ class agsgPlugin
             delete_option('agsg');
             /* do some stuff once right after activation */
         }
+    }
+
+    public static function iconCss()
+    {
+        $assets_url = esc_url(trailingslashit(plugins_url('/assets/', __FILE__)));
+        wp_enqueue_style('agsg-icon-css', $assets_url . 'css/icon-css.css');
     }
 
     public static function addHelp()
