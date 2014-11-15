@@ -1,12 +1,16 @@
 <?php
-/*
-Plugin Name: A GUI Shortcode Generator Plugin
-Plugin URI:
-Description: Generates shortcodes from WordPress admin page.  Make custom shortcodes in minutes without any coding knowledge.
-Version: 1.0.0
-Author: Robert Ruby II
-Author URI:
-*/
+/**
+ * Plugin Name: A GUI Shortcode Generator Plugin
+ * Plugin URI:
+ * Description: Generates shortcodes from WordPress admin page.  Make custom shortcodes in minutes without any coding knowledge.
+ * Version: 1.0.0
+ * Author: Robert Ruby II
+ * Author URI:
+ * Text Domain: Not Yet Implemented.
+ * Domain Path: N/A
+ * Network: true
+ * License: See Envato for details
+ */
 error_reporting(E_ERROR);
 // if not accessed by a post from this form
 if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['shortcode_rewrite']) {
@@ -16,14 +20,14 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['short
     add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
     add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
 } else if ($_POST['shortcode_rewrite']) {
-    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
-    // grab serialized data
-    parse_str($_POST['shortcode_rewrite'], $inputs);
-    $tag = $inputs['tag'];
-    $new_code = $inputs['new_code'];
-    $new_code = str_replace("\\'", "'", $new_code);
-    agsgPlugin::deleteShortcode($tag, $new_code);
-    exit;
+//    require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
+//    // grab serialized data
+//    parse_str($_POST['shortcode_rewrite'], $inputs);
+//    $tag = $inputs['tag'];
+//    $new_code = $inputs['new_code'];
+//    $new_code = str_replace("\\'", "'", $new_code);
+//    agsgPlugin::deleteShortcode($tag, $new_code);
+//    exit;
 } else if ($_POST['form_info']) {
 //    define( 'SHORTINIT', true ); --> tried SHORTINIT but got failure notices
     require_once($_SERVER['DOCUMENT_ROOT'] . 'robertrubyii/wp-load.php'); // Only way I could get it to work. :( - Don't like loading Wordpress at least its not getting loaded twice since we are just posting the data.
@@ -31,7 +35,6 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['short
     include_once('class-agsgShortcode.php');
     include_once('agsg-concrete-creator-classes.php');
     include_once('agsg-concrete-product-classes.php');
-    include_once('class-agsgNotices.php');
 
     // grab serialized data
     parse_str($_POST['form_info'], $inputs);
@@ -52,6 +55,9 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['short
     $args['atts']['values'] = $inputs['agsg_default'];
     $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
     $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
+
+    $args['preview'] = $inputs['preview'];
+    $args['regenerate'] = $inputs['regenerate'];
 
     // grab all conditions on the screen and create an array for each one that contains only the data for it if conditions exist
     if ($inputs['agsg_has_conditions'] === 'Yes') {
@@ -79,6 +85,7 @@ if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind'] && !$_POST['short
 error_reporting(E_ALL);
 include_once('agsg_shortcodes.php');
 include_once('class-agsgSettings.php');
+include_once('agsgListPage.php');
 
 
 /**
@@ -92,41 +99,16 @@ class agsgPlugin
 
     private function __construct()
     {
-        $settings = new agsgSettings(__FILE__);
+        $settings = new agsgSettings(__FILE__); // adds own menu item
+        // actions and filters
         add_action('current_screen', array($this, 'addHelp'));
-    }
-
-    public static function addShortcodeToFile($tag, $shortcode_code)
-    {
-        global $wpdb;
-        $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
-        if ($fh = fopen($fileName, 'a')) { // open file agsg for appending if true so we can append our shortcode
-            fwrite($fh, PHP_EOL . $shortcode_code . PHP_EOL);
-        }
-        fclose($fh);
-        $table = $wpdb->prefix . 'agsg_shortcodes';
-        $wpdb->update(
-            $table,
-            array(
-                'code' => $shortcode_code
-            ),
-            array('tag' => $tag),
-            array(
-                '%s'
-            ),
-            array('%s')
-        );
-        echo 'New Shortcode code Added';
-    }
-
-    public static function deleteShortcode($tag, $shortcode_code)
-    {
-        $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
-        $source_file = file_get_contents($fileName);
-        $source = preg_replace('/(\/\/' . $tag . ')(.*)(\/\/' . $tag . ')/s', "", $source_file);
-        file_put_contents($fileName, $source);
-        echo 'Old Shortcode code Deleted <br>';
-        agsgPlugin::addShortcodeToFile($tag, $shortcode_code);
+        // in agsgListPage.php
+        add_action('admin_menu', 'shortcode_add_menu_items');
+        add_filter('set-screen-option', 'shortcode_per_page_set_screen_option', 10, 3);
+        /**
+         * Use this for debugging
+         */
+//        add_action('current_screen', array($this, 'showHooks'));
     }
 
     public static function getInstance()
@@ -150,6 +132,7 @@ class agsgPlugin
           name VARCHAR(100) NOT NULL,
           kind VARCHAR(6) NOT NULL,
           tag VARCHAR(100) NOT NULL,
+          description VARCHAR(600) NOT NULL,
           example VARCHAR(300) NOT NULL,
           code TEXT NOT NULL,
           created_datetime DATETIME NOT NULL,
@@ -170,113 +153,125 @@ class agsgPlugin
     public static function addHelp()
     {
         $screen = get_current_screen();
-        $help_content = '<h3>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h3>';
-        $help_content .= '<ol>
-        <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
-        <li>Fill in the HTML TAG Name field ( Read notes under fields as this can be overriden )</li>
-        <li>Give your HTML element an id if you choose ( Read notes under fields as this can be overriden ).</li>
-        <li>Give your HTML element some base classes if you choose.(read notes under fields as you can add to this set later using shortcode attribute "class")</li>
-        <li>Give your HTML element some inline styles if you choose. (read notes under fields as you can add to this set later using shortcode attribute "style")</li>
-        <li>Give your HTML element some additional attributes that you may need or require. (remember you do not need to create the HTML attributes "class", "style", or "id" - See notes under field.)</li>
-        <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
-        <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content above what is wrapped, or reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
-        <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.( Make sure you read the notes under each field that has them carefully ).</li>
-        <li>Press "Generate Shortcode".</li>
-        </ol>
-        ';
-        // Add help panel
-        $screen->add_help_tab(array(
-            'id' => 'cscs',
-            'title' => 'Create a shortcode that surrounds content with an HTML element. (Enclosing)',
-            'content' => $help_content,
-        ));
+        if ($screen->id === 'settings_page_eagsg') {
+            $help_content = '<h3>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h3>';
+            $help_content .= '<ol>
+            <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
+            <li>Fill in the HTML TAG Name field ( Read notes under fields as this can be overriden )</li>
+            <li>Give your HTML element an id if you choose ( Read notes under fields as this can be overriden ).</li>
+            <li>Give your HTML element some base classes if you choose.(read notes under fields as you can add to this set later using shortcode attribute "class")</li>
+            <li>Give your HTML element some inline styles if you choose. (read notes under fields as you can add to this set later using shortcode attribute "style")</li>
+            <li>Give your HTML element some additional attributes that you may need or require. (remember you do not need to create the HTML attributes "class", "style", or "id" - See notes under field.)</li>
+            <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
+            <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content above what is wrapped, or reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
+            <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.( Make sure you read the notes under each field that has them carefully ).</li>
+            <li>Press "Generate Shortcode".</li>
+            </ol>
+            ';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'cscs',
+                'title' => 'Create a shortcode that surrounds content with an HTML element. (Enclosing)',
+                'content' => $help_content,
+            ));
 
-        $help_content = '<h3>Create a shortcode that is replaced with content. (Self-Closing)</h3>';
-        $help_content .= '<ol>
-        <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
-        <li>Fill in the HTML TAG Name field ( This is just required even if it is not going to be used - You can just put "blah" or better yet "self-closed", how about "ziptydoda" )</li>
-        <li>Skip down to the describe your shortcode area.</li>
-        <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
-        <li>Give your shortcode some attributes if you need them, to display conditional content and reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
-        <li>Give your shortcode some conditions if you need them, to check values of attributes and display the content you want to display.( Make sure you read the notes under each field that has them ).</li>
-        <li>Press "Generate Shortcode".</li>
-        </ol>
-        ';
-        // Add help panel
-        $screen->add_help_tab(array(
-            'id' => 'ces',
-            'title' => 'Create a shortcode that is replaced with content. (Self-Closing)',
-            'content' => $help_content,
-        ));
+            $help_content = '<h3>Create a shortcode that is replaced with content. (Self-Closing)</h3>';
+            $help_content .= '<ol>
+            <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
+            <li>Fill in the HTML TAG Name field ( This is just required even if it is not going to be used - You can just put "blah" or better yet "self-closed", how about "ziptydoda" )</li>
+            <li>Skip down to the describe your shortcode area.</li>
+            <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
+            <li>Give your shortcode some attributes if you need them, to display conditional content and reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
+            <li>Give your shortcode some conditions if you need them, to check values of attributes and display the content you want to display.( Make sure you read the notes under each field that has them ).</li>
+            <li>Press "Generate Shortcode".</li>
+            </ol>
+            ';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'ces',
+                'title' => 'Create a shortcode that is replaced with content. (Self-Closing)',
+                'content' => $help_content,
+            ));
 
-        $help_content = '<h3>Shortcode attribute syntax explained</h3>
-        <p>The shortcode attribute syntax is based off of the same idea as the shortcodes themselves but instead of activating what is called a callback function, it just lets you embed variables within the generated shortcode functions.  What that means is when anywhere inside a TinyMCE that an attribute name is encountered in between dual less than and dual greater than signs, it replaces it with the value fed from the shortcode when used.</p>
-        <p>Here is an example assuming you have a shortcode attribute named "link_text":
-        <code>I just love all the cool design features of the &lt;&lt;link_text&gt;&gt;</code></p>
-        <p>Here is an example assuming you have a shortcode attribute named "image":
-        <code>This is the best picture I\'ve seen of the mountains &lt;&lt;image&gt;&gt;</code></p>
-        <p>In both of these examples the attribute names and the "<" ">" signs will be replaced with what ever value the attributes are equal to when using the shortcode they were created with.</p>
-        ';
+            $help_content = '<h3>Shortcode attribute syntax explained</h3>
+            <p>The shortcode attribute syntax is based off of the same idea as the shortcodes themselves but instead of activating what is called a callback function, it just lets you embed variables within the generated shortcode functions.  What that means is when anywhere inside a TinyMCE that an attribute name is encountered in between dual less than and dual greater than signs, it replaces it with the value fed from the shortcode when used.</p>
+            <p>Here is an example assuming you have a shortcode attribute named "link_text":
+            <code>I just love all the cool design features of the &lt;&lt;link_text&gt;&gt;</code></p>
+            <p>Here is an example assuming you have a shortcode attribute named "image":
+            <code>This is the best picture I\'ve seen of the mountains &lt;&lt;image&gt;&gt;</code></p>
+            <p>In both of these examples the attribute names and the "<" ">" signs will be replaced with what ever value the attributes are equal to when using the shortcode they were created with.</p>
+            ';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'sase',
+                'title' => 'Shortcode attribute syntax explained',
+                'content' => $help_content,
+            ));
+        }
+    }
+
+    /**
+     * Used for debugging - Adds help tab to show hooks for page
+     */
+    public static function showHooks()
+    {
+        global $current_screen;
+        $screen = $current_screen;
+        global $hook_suffix;
+        $screen_id = $screen->id;
+        // List screen properties
+        $variables = '<ul style="width:50%;float:left;"> <strong>Screen variables </strong>'
+            . sprintf('<li> Screen id : %s</li>', $screen_id)
+            . sprintf('<li> Screen base : %s</li>', $screen->base)
+            . sprintf('<li>Parent base : %s</li>', $screen->parent_base)
+            . sprintf('<li> Parent file : %s</li>', $screen->parent_file)
+            . sprintf('<li> Hook suffix : %s</li>', $hook_suffix)
+            . '</ul>';
+
+        // Append global $hook_suffix to the hook stems
+        $hooks = array(
+            "load-$hook_suffix",
+            "admin_print_styles-$hook_suffix",
+            "admin_print_scripts-$hook_suffix",
+            "admin_head-$hook_suffix",
+            "admin_footer-$hook_suffix"
+        );
+
+        // If add_meta_boxes or add_meta_boxes_{screen_id} is used, list these too
+        if (did_action('add_meta_boxes_' . $screen_id))
+            $hooks[] = 'add_meta_boxes_' . $screen_id;
+
+        if (did_action('add_meta_boxes'))
+            $hooks[] = 'add_meta_boxes';
+
+        // Get List HTML for the hooks
+        $hooks = '<ul style="width:50%;float:left;"> <strong>Hooks </strong> <li>' . implode('</li><li>', $hooks) . '</li></ul>';
+
+        // Combine $variables list with $hooks list.
+        $help_content = $variables . $hooks;
+
         // Add help panel
         $screen->add_help_tab(array(
-            'id' => 'sase',
-            'title' => 'Shortcode attribute syntax explained',
+            'id' => 'wptuts-screen-help',
+            'title' => 'Screen Information',
             'content' => $help_content,
         ));
     }
+
+    /**
+     * Another function for debugging
+     * @param $debugItem
+     * @param int $die
+     */
+    public static function rfd_debugger($debugItem, $die = 0)
+    {
+        echo '<pre>';
+        print_r($debugItem);
+        echo '</pre>';
+        if ($die == 1) {
+            die();
+        }
+    }
 }
 
-// Other functions for debugging - Uncomment when/if needed
-//function rfd_debugger($debugItem, $die = 0)
-//{
-//    echo '<pre>';
-//    print_r($debugItem);
-//    echo '</pre>';
-//    if ($die == 1) {
-//        die();
-//    }
-//}
-//function showHooks()
-//{
-//    global $current_screen;
-//    $screen = $current_screen;
-//    global $hook_suffix;
-//    $screen_id = $screen->id;
-//    // List screen properties
-//    $variables = '<ul style="width:50%;float:left;"> <strong>Screen variables </strong>'
-//        . sprintf('<li> Screen id : %s</li>', $screen_id)
-//        . sprintf('<li> Screen base : %s</li>', $screen->base)
-//        . sprintf('<li>Parent base : %s</li>', $screen->parent_base)
-//        . sprintf('<li> Parent file : %s</li>', $screen->parent_file)
-//        . sprintf('<li> Hook suffix : %s</li>', $hook_suffix)
-//        . '</ul>';
-//
-//    // Append global $hook_suffix to the hook stems
-//    $hooks = array(
-//        "load-$hook_suffix",
-//        "admin_print_styles-$hook_suffix",
-//        "admin_print_scripts-$hook_suffix",
-//        "admin_head-$hook_suffix",
-//        "admin_footer-$hook_suffix"
-//    );
-//
-//    // If add_meta_boxes or add_meta_boxes_{screen_id} is used, list these too
-//    if (did_action('add_meta_boxes_' . $screen_id))
-//        $hooks[] = 'add_meta_boxes_' . $screen_id;
-//
-//    if (did_action('add_meta_boxes'))
-//        $hooks[] = 'add_meta_boxes';
-//
-//    // Get List HTML for the hooks
-//    $hooks = '<ul style="width:50%;float:left;"> <strong>Hooks </strong> <li>' . implode('</li><li>', $hooks) . '</li></ul>';
-//
-//    // Combine $variables list with $hooks list.
-//    $help_content = $variables . $hooks;
-//
-//    // Add help panel
-//    $screen->add_help_tab(array(
-//        'id' => 'wptuts-screen-help',
-//        'title' => 'Screen Information',
-//        'content' => $help_content,
-//    ));
-//}
+

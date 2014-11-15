@@ -7,44 +7,38 @@
  */
 /**
  * Class agsgATTgenerator
- * Decides which type (enclosed OR self-closed) of attributed (ATT) shortcodes to create.
+ * Creates shortcodes with attributes
  */
 class agsgATTgenerator extends agsgShortcodeGenerator
 {
     public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
-        if ($type == 'enclosed') {
-            $shortcode = new agsgATTenclosed($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description);
-        } else if ($type == 'self-closed') {
-//            $shortcode = new agsgATTselfclosed($htmlTag, $atts, $tag);
-        } else {
-            $shortcode = null;
-        }
+        /**
+         * To extend this plugin you can check the "type" here and call different product classes - you could always just make another generator class also but they must implement createShortcode in the same manner regardless of what the products use.
+         * I choose just a non attributed and attributed but it could be different
+         */
+        $shortcode = new agsgATT($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description);
         return $shortcode;
     }
 }
 
 /**
  * Class agsgNonATTgenerator
- * Decides which type (enclosed OR self-closed) of non-attributed (NonATT) shortcodes to create.
- * @complete
+ * Creates shortcodes without attributes
  */
 class agsgNonATTgenerator extends agsgShortcodeGenerator
 {
     public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions)
     {
-        // check the type
-        if ($type == 'enclosed') {
-            // get our open and close tags since were are going to wrap something rather than replace the shortcode and add in our classes/ids/inlineStyles while were at it
-            $htmlTag = $this->getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle, $html_atts);
-            $htmlstg = $htmlTag[0];
-            $htmletg = $htmlTag[1];
-            $shortcode = new agsgNonATTenclosed($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class);
-        } else if ($type == 'self-closed') {
-//            $shortcode = new agsgNonATTselfclosed($htmlTag, $atts, $tag);
-        } else {
-            $shortcode = null;
-        }
+        /**
+         * To extend this plugin you can check the "type" here and call different product classes - you could always just make another generator class also but they must implement createShortcode in the same manner regardless of what the products use.
+         * I choose just a non attributed and attributed but it could be different
+         */
+        // get our open and close tags since were are going to wrap something rather than replace the shortcode and add in our classes/ids/inlineStyles while were at it
+        $htmlTag = $this->getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle, $html_atts);
+        $htmlstg = $htmlTag[0];
+        $htmletg = $htmlTag[1];
+        $shortcode = new agsgNonATTenclosed($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class);
         return $shortcode;
     }
 }

@@ -25,42 +25,96 @@ abstract class agsgShortcodeGenerator
         $atts = $args['atts'];
         $mapped_atts = $args['mapped_atts'];
         $conditions = $args['conditions'];
+        $preview = $args['preview'];
+        $regenerate = $args['regenerate'];
 
         if (!$atts) $atts = array();
-        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions);
-        // access shortcode global 'exists' to see if we can create the file.
-        if (!$this->shortcode->exists) {
-            $this->addShortcodeToFile();
-            $this->print_shortcode_data();
-        } else {
+
+        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $preview, $regenerate);
+        if ($preview)
+            $this->shortcode->preview = $preview;
+        if ($regenerate)
+            $this->shortcode->regenerate = $regenerate;
+
+        $this->shortcode->filename = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
+
+        if ($this->shortcode->preview) { // if this is a preview
+            $this->print_shortcode_msg('preview');
+        } else if ($this->shortcode->regenerate) { // are we regenerating?
+            $this->regenerate_shortcode_code();
+            $this->update_shortcode();
+            $this->add_shortcode_to_file();
+            $this->print_shortcode_msg();
+        } else if (!$this->shortcode->exists) { // if one exists and there is a regen is set still add to file
+            $this->add_shortcode_to_file();
+            $this->print_shortcode_msg();
+        } else { // one exists but not regen
             $this->print_error_data('exists');
         }
 
     }
 
-    private function print_shortcode_data()
+    private function regenerate_shortcode_code()
     {
-        $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you just created with AGSG</h3>';
-        $html .= '<h4>The code for this shortcode was added to file located at:</h4>
-        <i>"' . $this->shortcode->filename . '"</i><br/>';
-        $html .= '<h4>The code generated and added to the file above by AGSG...</h4>
-        <textarea readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
-        $html .= '<h4>An Example of how to use the shortcode you created...</h4>
-        <i>"' . $this->shortcode->example . '"</i><br/>';
-        echo $html;
+        $source_file = file_get_contents($this->shortcode->fileName);
+        $source = preg_replace('/(\/\/' . $this->shortcode->tag . ')(.*)(\/\/' . $this->shortcode->tag . ')/s', "", $source_file);
+        file_put_contents($this->shortcode->fileName, $source);
+        echo 'Old Shortcode code deleted from file....<br>';
+        agsgPlugin::addShortcodeToFile($this->shortcode->tag, $this->shortcode->shortcode_code);
     }
 
-    /**
-     * Adds a shortcode to the file 'agsg_shortcodes.php'
-     */
-    private function addShortcodeToFile()
+    private function update_shortcode()
     {
-        $fileName = plugin_dir_path(__FILE__) . 'agsg_shortcodes.php';
-        $this->shortcode->filename = $fileName;
-        if ($fh = fopen($fileName, 'a')) { // open file agsg for appending if true so we can append our shortcode
+        global $wpdb;
+        $table = $wpdb->prefix . 'agsg_shortcodes';
+        $wpdb->update(
+            $table,
+            array(
+                'code' => $this->shortcode->shortcode_code,
+                'example' => $this->shortcode->example,
+                'description' => $this->shortcode->description,
+                'kind' => $this->shortcode->kind,
+            ),
+            array('tag' => $this->shortcode->tag),
+            array(
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+            ),
+            array('%s')
+        );
+        echo 'Shorcode database row updated for ' . $this->shortcode->tag . '...';
+    }
+
+    private function add_shortcode_to_file()
+    {
+        if ($fh = fopen($this->shortcode->filename, 'a')) { // open file agsg for appending if true so we can append our shortcode
             fwrite($fh, PHP_EOL . $this->shortcode->shortcode_code . PHP_EOL);
         }
         fclose($fh);
+    }
+
+    private function print_shortcode_msg($type = '')
+    {
+        if ($type === 'preview') {
+            $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you may want to create with AGSG</h3>';
+            $html .= '<h4>The code for this shortcode will be added to file located at:</h4>
+            <i>"' . $this->shortcode->filename . '"</i><br/>';
+            $html .= '<h4>The code generated and that will be added to the file above by AGSG...</h4>
+            <textarea readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
+            $html .= '<h4>An Example of how to use the shortcode you may create...</h4>
+            <i>"' . $this->shortcode->example . '"</i><br/>';
+        } else {
+            $html = '<h3>Some details about the shortcode "' . $this->shortcode->name . '", you just created with AGSG</h3>';
+            $html .= '<h4>The code for this shortcode was added to file located at:</h4>
+            <i>"' . $this->shortcode->filename . '"</i><br/>';
+            $html .= '<h4>The code generated and added to the file above by AGSG...</h4>
+            <textarea readonly="readonly">' . $this->shortcode->shortcode_code . '</textarea>';
+            $html .= '<h4>An Example of how to use the shortcode you created...</h4>
+            <i>"' . $this->shortcode->example . '"</i><br/>';
+        }
+        echo $html;
     }
 
     private function print_error_data($err_type)
@@ -134,7 +188,7 @@ abstract class agsgShortcodeGenerator
     </script>
 SCRIPT;
             /**
-             * End eagsg page regen form -- shortcode_rewrite
+             * End eagsg page regen form
              */
 
         }
@@ -176,7 +230,9 @@ SCRIPT;
      * @param array $atts - Multideminsional array containing shortcode attribute names and default values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
      * @param array $mapped_atts - Multideminsional array containing html tag and shortcode attribute names that have been matched up or 'mapped' - array( 'match_html_att_names' => array( name0, name1, name2 ) , 'match_shortcode_att_names' => array( 'value0', value1', value2'  ) );
      * $param array $conditions - Multimdeminsional array containing conditions data
+     * $param bool  $preview - If flagged will only generate a preview
+     * $param bool  $regenerate - If flagged, this will update the shortcode tag fed.
      * @return mixed
      */
-    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions); // the factory method to be implemented by concrete creator classes
+    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $preview, $regenerate); // the factory method to be implemented by concrete creator classes
 }

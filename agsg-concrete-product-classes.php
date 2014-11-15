@@ -1,19 +1,18 @@
 <?php
 /**
- * Concrete product classes - They give us the type of shortcodes's we want
+ * Concrete product classes - They produce our shortcodes when called from a generator
  * They extend agsgShortcode
  * @package WordPress
  * @subpackage AGSG
  */
-class agsgATTenclosed extends agsgShortcode
+class agsgATT extends agsgShortcode
 {
     public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description)
     {
 
         $this->name = $tag . '_agsg';
         $this->description = $description;
-        // Set up some local variables
-            $att_names = $atts['names'];
+        $att_names = $atts['names'];
             $att_values = $atts['values'];
             $html_att_names = $html_atts['names'];
             $html_att_values = $html_atts['values'];
@@ -21,19 +20,17 @@ class agsgATTenclosed extends agsgShortcode
             $mapped_shortcode_att_names = $mapped_atts['match_shortcode_att_names'];
         error_reporting(0);
         $unmapped_html_att_names = array_diff($html_att_names, $mapped_html_att_names); // which weren't mapped?
-            $unmapped_html_att_values = array_filter($html_att_values, array($this, 'filterHTMLattValues'));
+        $unmapped_html_att_values = array_filter($html_att_values, array($this, 'filterHTMLattValues'));
             $filtered_shortcode_att_names = array_filter($mapped_shortcode_att_names, array($this, 'removeSelect'));
             $filtered_html_att_names = array_filter($mapped_html_att_names, array($this, 'removeSelect'));
         error_reporting(E_ALL);
         $att_match_str = '';
-            $this->shortcodes_atts_str = '';
+        $this->shortcodes_atts_str = '';
             $unmapped_html_atts = '';
 
-            // set some global vars we want to store or use
             $this->kind = 'ATT';
         $this->tag = $tag;
-        $this->type = 'enclosed';
-            $this->id = $id;
+        $this->id = $id;
             $this->class = $class;
             $this->htmlstg = "<$htmlTag>"; // default
             $this->htmletg = "</$htmlTag>"; // default
@@ -327,8 +324,7 @@ class agsgNonATTenclosed extends agsgShortcode
         $this->description = $description;
         $this->tag = $tag;
         $this->kind = 'NonATT';
-            $this->type = 'enclosed';
-            $this->htmlstg = $htmlstg;
+        $this->htmlstg = $htmlstg;
             $this->htmletg = $htmletg;
             $this->id = $id;
             $this->class = $class;

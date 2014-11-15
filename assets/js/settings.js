@@ -568,8 +568,8 @@ jQuery(document).ready(function ($) {
         }
         // no errors
         if (!err) {
-            // set type of shortcode
-            var type = 'enclosed';
+            // set type of shortcode if you wish to extend it to do more.
+            var type = 'default';
 
             // let's disable the inputs for the duration of the ajax request
             jQuery(inputs).prop("disabled", true);
@@ -577,7 +577,7 @@ jQuery(document).ready(function ($) {
             request = jQuery.ajax({
                 url: page,
                 type: "post",
-                data: { type: type, form_info: serializedData, matched_attributes: serializedMatchData, preview: preview }
+                data: { type: type, form_info: serializedData, matched_attributes: serializedMatchData }
             });
             // callback handler that will be called on success
             request.done(function (html, response, textStatus, jqXHR) {
