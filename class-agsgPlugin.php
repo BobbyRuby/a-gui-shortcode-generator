@@ -54,7 +54,6 @@ if ($_POST['form_info']) {
     }
     // get kind
     $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
-    echo 'what the fuck';
     if ($kind === 'ATT') {
         $shortcode = new agsgATTgenerator();
         $shortcode->generateShortcode($args);
