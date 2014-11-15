@@ -171,7 +171,7 @@ EOD;
                         // if attributes exist
                         if (strpos($tinyMCE, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
                             // get an array of just attributes to work with
-                            preg_match('/(\&lt\;\&lt\;[a-z_-]+\&gt\;\&gt\;)/', $tinyMCE, $matches);
+                            preg_match('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', $tinyMCE, $matches);
                             // cycle through each, create var = value string, and add to array
                             if (is_array($matches)) {
                                 foreach ($matches as $iv) {
