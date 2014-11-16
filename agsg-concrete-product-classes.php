@@ -100,6 +100,7 @@ VARSTR;
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
  $atts );
+ if($content){
     $var =
 VARSTR;
             // is their an override for the html tag
@@ -157,9 +158,15 @@ VARSTR;
             }
             $this->shortcode_code .= <<<EOD
 .'</$htmlTag>';
+}else{
 EOD;
+        $this->shortcode_code .= <<<'VARSTR'
 
-            if (count($conditions)) {
+  $var = '';
+}
+VARSTR;
+
+        if (count($conditions)) {
                 foreach ($conditions as $condition) {
                     $type = $condition["type"];
                     $operator = $condition["operator"];
@@ -175,8 +182,18 @@ EOD;
                             // cycle through each, create var = value string, and add to array
                             if (is_array($matches)) {
                                 foreach ($matches as $iv) {
-                                    $iv = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', '$a[\'' . $att_name . '\']', $iv);
+                                    $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', '$a[\'' . $att_name . '\']', $iv);
                                     $ref_atts[] = "$$att_name = $iv";
+                                }
+                            } else {
+                                // get an array of just attributes to work with
+                                preg_match('/(<<[a-z_0-9]+>>)/', $tinyMCE, $matches);
+                                // cycle through each, create var = value string, and add to array
+                                if (is_array($matches)) {
+                                    foreach ($matches as $iv) {
+                                        $iv = preg_replace('/(<<[a-z_0-9]+>>)/', '$a[\'' . $att_name . '\']', $iv);
+                                        $ref_atts[] = "$$att_name = $iv";
+                                    }
                                 }
                             }
                         }

@@ -8,7 +8,6 @@
  * Author URI:
  * Text Domain: Not Yet Implemented as of v1.0.0
  * Domain Path: N/A
- * Network: true
  * License: See Envato for details
  */
 
@@ -151,7 +150,7 @@ class agsgPlugin
     public static function addHelp()
     {
         $screen = get_current_screen();
-        if ($screen->id === 'tools_page_eagsg') {
+        if ($screen->id === 'toplevel_page_eagsg') {
             $help_content = '<h3>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h3>';
             $help_content .= '<ol>
             <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>

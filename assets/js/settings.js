@@ -501,14 +501,22 @@ jQuery(document).ready(function ($) {
         // check for blank attribute names if Yes is checked
         if (!has_atts_No) {
             jQuery('[name="agsg_att_name[]"]').each(function (e) {
+                var val = jQuery(this).val();
                 if (jQuery(this).val() === '') {
                     jQuery(this).parent().parent().addClass('form-invalid');
                     jQuery(this).parent().find('.error').remove();
                     jQuery(this).parent().prepend('<span class="error">Must not be empty.  Please fill in or remove.</span>');
                     err = true;
-                } else {
-                    jQuery(this).parent().parent().removeClass('form-invalid');
-                    jQuery(this).parent().find('.error').remove();
+                } else { // great its not blank... check for numbers at the beginning of the attribute - (numbers at beginning screw up variable generation)
+                    var att_name_matches = val.match(/(^[^0-9][a-z_0-9]+)/);
+                    if (Array.isArray(att_name_matches) === true) {
+                        jQuery(this).parent().parent().addClass('form-invalid');
+                        jQuery(this).parent().find('.error').remove();
+                        jQuery(this).parent().prepend('<span class="error">Must not have number at beginning.  Please remove.  A good thing to do is place a letter before the number, so if setting up a fighter table for example you could this. Instead of an attribute named "1_wp" where "1" means "fighter number" and "wp" means "win percentage" you could do "f1_wp".</span>');
+                    } else {
+                        jQuery(this).parent().parent().removeClass('form-invalid');
+                        jQuery(this).parent().find('.error').remove();
+                    }
                 }
             });
         }
@@ -650,7 +658,6 @@ function getShortcodeAttributeOptionsList(reset) {
  */
 function loadTinyMCE(selector, existing_ids) {
     if (typeof tinymce == 'undefined') {
-
         jQuery.getScript('//tinymce.cachefly.net/4/tinymce.min.js', function () {
             window.tinymce.dom.Event.domLoaded = true;
             tinymce.init({
@@ -658,7 +665,9 @@ function loadTinyMCE(selector, existing_ids) {
                 plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste emoticons paste textcolor colorpicker textpattern"],
                 toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
                 toolbar2: "preview media | forecolor backcolor emoticons insertfile",
-                menubar: "tools table format view insert edit"
+                menubar: "tools table format view insert edit",
+                schema: "html5",
+                entity_encoding: "raw"
             });
         });
     }
@@ -675,8 +684,9 @@ function loadTinyMCE(selector, existing_ids) {
             plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste emoticons paste textcolor colorpicker textpattern"],
             toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
             toolbar2: "preview media | forecolor backcolor emoticons insertfile",
-            menubar: "tools table format view insert edit"
-
+            menubar: "tools table format view insert edit",
+            schema: "html5",
+            entity_encoding: "raw"
         });
         // restart all current instances
         for (var i = 0; i < existing_ids.length; i++) {
