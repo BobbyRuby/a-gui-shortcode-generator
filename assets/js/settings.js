@@ -667,7 +667,9 @@ function loadTinyMCE(selector, existing_ids) {
                 toolbar2: "preview media | forecolor backcolor emoticons insertfile",
                 menubar: "tools table format view insert edit",
                 schema: "html5",
-                entity_encoding: "raw"
+                entity_encoding: "raw",
+                extended_valid_elements: "a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name],$elements",
+                valid_children: "+body[style]"
             });
         });
     }
@@ -686,7 +688,9 @@ function loadTinyMCE(selector, existing_ids) {
             toolbar2: "preview media | forecolor backcolor emoticons insertfile",
             menubar: "tools table format view insert edit",
             schema: "html5",
-            entity_encoding: "raw"
+            entity_encoding: "raw",
+            extended_valid_elements: "a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name],$elements",
+            valid_children: "+body[style]"
         });
         // restart all current instances
         for (var i = 0; i < existing_ids.length; i++) {
