@@ -87,6 +87,14 @@ class agsg_shortcode_table extends agsg_WP_List_Table
         return '<textarea readonly>' . $data . '</textarea>';
     }
 
+    function column_created_datetime($item)
+    {
+        $old_date = $item['created_datetime']; // returns Saturday, January 30 10 02:06:34
+        $old_date_timestamp = strtotime($old_date);
+        $new_date = date('g:ia \o\n l jS F Y', $old_date_timestamp);
+        return $new_date;
+    }
+
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
      * is given special treatment when columns are processed. It ALWAYS needs to
@@ -124,11 +132,28 @@ class agsg_shortcode_table extends agsg_WP_List_Table
     {
         $columns = array(
             'cb' => '<input type="checkbox" />', //Render a checkbox instead of text
-            'type' => 'Type',
-            'name' => 'Function Name',
-            'tag' => 'Tag Name',
+//            'type' => 'Type',
+//            'name' => 'Name',
+            'tag' => 'Shortcode Name',
             'kind' => 'Kind',
-//            'description' => 'Description',  taken out of list page because it is in code block in the list page
+            'description' => 'Description',
+            'example' => 'Example',
+            'code' => 'Code',
+            'created_datetime' => 'Created Datetime'
+        );
+        return $columns;
+    }
+
+    /**
+     * used to grab cols to output search by checkboxes
+     * @return array
+     */
+    function get_search_cols()
+    {
+        $columns = array(
+            'tag' => 'Shortcode Name',
+            'kind' => 'Kind',
+            'description' => 'Description',
             'example' => 'Example',
             'code' => 'Code',
             'created_datetime' => 'Created Datetime'
@@ -154,8 +179,8 @@ class agsg_shortcode_table extends agsg_WP_List_Table
     {
         $sortable_columns = array(
 //            'id'     => array('id',false),  //true means it's already sorted
-            'type' => array('type', false),
-            'name' => array('name', false),
+//            'type' => array('type', false),
+//            'name' => array('name', false),
             'tag' => array('tag', false),
             'kind' => array('kind', false),
         );
@@ -214,15 +239,28 @@ class agsg_shortcode_table extends agsg_WP_List_Table
         file_put_contents($filename, $source);
     }
 
-    function get_shortcodes($order_params = false)
+    function get_shortcodes($order_params = false, $search_params = false)
     {
         global $wpdb;
         if ($order_params) {
             $orderby = $order_params['orderby'];
             $order = $order_params['order'];
             $shortcodes = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes ORDER BY $orderby $order", ARRAY_A);
-        } else {
-            $shortcodes = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes", ARRAY_A);
+        } else
+            if ($search_params) {
+                $s = $search_params['s'];
+                $by = $search_params['by'];
+                for ($i = 0; $i < count($by); $i++) {
+                    if ($i === 0) {
+                        $search = "WHERE $by[$i] LIKE '%$s%'";
+                    } else {
+                        $search .= " OR $by[$i] LIKE '%$s%'";
+                    }
+
+                }
+                $shortcodes = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes $search", ARRAY_A);
+            } else {
+                $shortcodes = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes", ARRAY_A);
         }
         return $shortcodes;
     }
@@ -257,36 +295,21 @@ class agsg_shortcode_table extends agsg_WP_List_Table
             // get the default value if none is set
             $per_page = $screen->get_option('per_page', 'default');
         }
-        /**
-         * REQUIRED. Now we need to define our column headers. This includes a complete
-         * array of columns to be displayed (slugs & titles), a list of columns
-         * to keep hidden, and a list of columns that are sortable. Each of these
-         * can be defined in another method (as we've done here) before being
-         * used to build the value for our _column_headers property.
-         */
-        $columns = $this->get_columns();
-        $hidden = array();
-        $sortable = $this->get_sortable_columns();
-        /**
-         * REQUIRED. Finally, we build an array to be used by the class for column
-         * headers. The $this->_column_headers property takes an array which contains
-         * 3 other arrays. One for all columns, one for hidden columns, and one
-         * for sortable columns.
-         */
-        $this->_column_headers = array($columns, $hidden, $sortable);
-        /**
-         * Optional. You can handle your bulk actions however you see fit. In this
-         * case, we'll handle them within our package just to keep things clean.
-         */
+
+        $this->_column_headers = $this->get_column_info(); // works with screen options function add_options
+
         $this->process_bulk_action();
-        /**
-         * Use sorting query or no?
-         */
+        // is sorted
         if (isset($_GET['orderby']) && isset($_GET['order'])) {
             $order_params['orderby'] = $_GET['orderby'];
             $order_params['order'] = $_GET['order'];
             $data = $this->get_shortcodes($order_params);
-        } else {
+        } else
+            // is search
+            if (isset($_POST['s'])) {
+                $search_params = array('s' => $_POST['s'], 'by' => $_POST['searchBy']);
+                $data = $this->get_shortcodes(false, $search_params);
+            } else {
             $data = $this->get_shortcodes();
         }
         /**
@@ -356,6 +379,7 @@ function agsg_shortcode_list_js_enqueue()
 function agsg_shortcode_page_screen_options()
 {
     global $shortcode_page;
+    global $shortcode_list_table;
     $screen = get_current_screen();
     // get out of here if we are not on our settings page
     if (!is_object($screen) || $screen->id != $shortcode_page)
@@ -367,6 +391,8 @@ function agsg_shortcode_page_screen_options()
         'option' => 'shortcode_per_page'
     );
     add_screen_option('per_page', $args);
+
+    $shortcode_list_table = new agsg_shortcode_table();
 }
 
 function agsg_shortcode_per_page_set_screen_option($status, $option, $value)
@@ -384,12 +410,66 @@ function agsg_shortcode_per_page_set_screen_option($status, $option, $value)
  */
 function agsg_shortcode_render_list_page()
 {
-    global $current_user;
+    global $shortcode_page;
+    global $shortcode_list_table;
     //Create an instance of our package class...
-    $shortcode_list_table = new agsg_shortcode_table();
+
     //Fetch, prepare, sort, and filter our data...
     $shortcode_list_table->prepare_items();
     ?>
+    <!-- serach form -->
+    <div class="search-container">
+        <form method="post">
+            <input type="hidden" name="page" value="<?php echo $shortcode_page ?>"/>
+            <?php $shortcode_list_table->search_box('Search by Name', $shortcode_page); ?>
+            <div class="check-box-container">
+                <?php
+                $cols = $shortcode_list_table->get_search_cols();
+                $col_ks = array_keys($cols);
+                echo "<span class='search-by'><strong>Search By:</strong></span>";
+                for ($i = 0; $i < count($cols); $i++) {
+                    $col_k = $col_ks[$i];
+                    echo "<label for='searchBy-" . $col_ks[$i] . "'> $cols[$col_k] </label>
+                <input id='searchBy-" . $col_ks[$i] . "' type='checkbox' name='searchBy[]' value='" . $col_ks[$i] . "' />";
+                }
+                echo "<span class='search-by'><strong>For:</strong></span>";
+                ?>
+            </div>
+        </form>
+    </div>
+    <div class="search-response"><?php
+        if (isset($_POST['s']) && !isset($_POST['searchBy'])) {
+            echo '<p class="error form-invalid">No columns selected, please select a column.</p>';
+        } else if (isset($_POST['s']) && $_POST['s'] === '') {
+            echo '<p class="error form-invalid">Please enter a search phrase to look for.</p>';
+        }
+        ?></div>
+    <!--    <div class="search-response">-->
+    <!--        --><?php // @todo - Cannot figure out why this will not show columns when bottom labels are clicked
+//        if(isset($_POST['s']) ){
+//            if(isset($_POST['searchBy'])){
+//                $s = $_POST['s'];
+//                $s_msg = "Search results for query $s in columns:";
+//                $by = $_POST['searchBy'];
+//                for($i = 0; $i < count($by); $i++){
+//                    if($by[$i] == 'tag'){
+//                        $col = 'Shortcode Name';
+//                    }
+//                    if($i === 0){
+//                        $s_msg .= ' '.ucfirst($col);
+//                    }
+//                    else{
+//                        $s_msg .= ' / '.ucfirst($col);
+//                    }
+//                }
+//            }else{
+//                $s_msg = 'No columns selected for search.  All shortcodes returned.';
+//            }
+//            echo $s_msg;
+//        }
+//
+    ?>
+    <!--    </div>-->
     <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
     <form id="shortcodes_filter" method="get">
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
@@ -398,5 +478,16 @@ function agsg_shortcode_render_list_page()
         $shortcode_list_table->display();
         ?>
     </form>
+    <div class="check-box-container-bottom">
+        <?php
+        echo "<span class='search-by'><strong>Search By:</strong></span>";
+        for ($i = 0; $i < count($cols); $i++) {
+            $col_k = $col_ks[$i];
+            echo "<label for='searchBy-" . $col_ks[$i] . "'> $cols[$col_k] </label>
+                <input id='searchBy" . $col_ks[$i] . "' type='checkbox' name='searchBy[]' value='" . $col_ks[$i] . "' />";
+        }
+        echo "<span class='search-by'><strong>For:</strong></span>";
+        ?>
+    </div>
 <?php
 }

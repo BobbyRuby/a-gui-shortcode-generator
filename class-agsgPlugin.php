@@ -11,7 +11,7 @@
  * License: See Envato for details
  */
 
-if ($_POST['form_info']) {
+if ($_POST['form_info']) { //@todo Refactor to WP Ajax in 1.1.0
     $wp_load = agsgPlugin::get_wp_load_path();
     require_once($wp_load);
     include_once('class-agsgShortcodeGenerator.php');
@@ -63,6 +63,15 @@ if ($_POST['form_info']) {
     }
 
     exit;
+//} elseif($_POST['shortcode_button_list']){  @todo Set up button when refactoring to WP Ajax - 1.1.0
+//    $wp_load = agsgPlugin::get_wp_load_path();
+//    require_once($wp_load);
+//    // get array of tag names and examples
+//    global $wpdb;
+//    $table = $wpdb->prefix.'agsg_shortcodes';
+//    $rows = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes", ARRAY_A);
+//    echo json_encode($rows);
+//    exit;
 } else // if not accessed by a post from this form
     if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
         // make sure it wasn't accessed directly
@@ -71,7 +80,6 @@ if ($_POST['form_info']) {
         add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
         add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
     }
-error_reporting(E_ALL);
 include_once('agsg_shortcodes.php');
 include_once('class-agsgSettings.php');
 include_once('agsgListPage.php');
@@ -90,8 +98,9 @@ class agsgPlugin
     {
         $settings = new agsgSettings(__FILE__); // adds own menu item
         // actions and filters
-        add_action('current_screen', array($this, 'addHelp'));
-        add_action('admin_print_styles', array($this, 'iconCss'));
+        add_action('current_screen', array(&$this, 'addHelp'));
+        add_action('admin_print_styles', array(&$this, 'iconCss'));
+        add_action('admin_head', array(&$this, 'addButton'));
         // in agsgListPage.php
         add_action('admin_menu', 'agsg_shortcode_add_menu_items');
         add_filter('set-screen-option', 'agsg_shortcode_per_page_set_screen_option', 10, 3);
@@ -153,15 +162,15 @@ class agsgPlugin
         if ($screen->id === 'toplevel_page_eagsg') {
             $help_content = '<h3>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h3>';
             $help_content .= '<ol>
-            <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
-            <li>Fill in the HTML TAG Name field ( Read notes under fields as this can be overriden )</li>
-            <li>Give your HTML element an id if you choose ( Read notes under fields as this can be overriden ).</li>
-            <li>Give your HTML element some base classes if you choose.(read notes under fields as you can add to this set later using shortcode attribute "class")</li>
-            <li>Give your HTML element some inline styles if you choose. (read notes under fields as you can add to this set later using shortcode attribute "style")</li>
-            <li>Give your HTML element some additional attributes that you may need or require. (remember you do not need to create the HTML attributes "class", "style", or "id" - See notes under field.)</li>
-            <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
-            <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content above what is wrapped, or reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
-            <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.( Make sure you read the notes under each field that has them carefully ).</li>
+            <li>Fill in the Shortcode Tag Name field. This should be as short as possible, unique, but as descriptive as possible. ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
+            <li>Fill in the HTML TAG Name field. ( Read notes under fields as this can be overriden )</li>
+            <li>Give your HTML element an id if you are making an enclosed shortcode. ( Read notes under fields as this can be overriden ).</li>
+            <li>Give your HTML element some base classes if you are making an enclosed shortcode. ( Read notes under fields as you can add to this set later using shortcode attribute "class" )</li>
+            <li>Give your HTML element some inline styles if you are making an enclosed shortcode. ( Read notes under fields as you can add to this set later using shortcode attribute "style")</li>
+            <li>Give your HTML element some additional attributes that you may need or require. ( Remember you do not need to create the HTML attributes "class", "style", or "id" but any other attribute you wish your element to have should be noted here. )</li>
+            <li>Describe your shortcode, this description is inserted in the code in a comment block before the function begins, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code regeneration rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one only adds NEW attributes or conditions while leaving everything else exactly the same. )</li>
+            <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content below what is wrapped, or reference their values inside conditional content using the attribute reference syntax..</li>
+            <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.</li>
             <li>Press "Generate Shortcode".</li>
             </ol>
             ';
@@ -174,12 +183,12 @@ class agsgPlugin
 
             $help_content = '<h3>Create a shortcode that is replaced with content. (Self-Closing)</h3>';
             $help_content .= '<ol>
-            <li>Fill in the Shortcode Tag Name field - This should be as short as possible, unique, but as descriptive as possible ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
+            <li>Fill in the Shortcode Tag Name field. This should be as short as possible, unique, but as descriptive as possible. ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when you click out of the field it will put them in for you. ).</li>
             <li>Fill in the HTML TAG Name field ( This is just required even if it is not going to be used - You can just put "blah" or better yet "self-closed", how about "ziptydoda" )</li>
             <li>Skip down to the describe your shortcode area.</li>
-            <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one is EXACTLY the same besides for new attributes or conditions. )</li>
-            <li>Give your shortcode some attributes if you need them, to display conditional content and reference their values inside conditional content using the attribute reference syntax.( Make sure you read the notes under each field that has them ).</li>
-            <li>Give your shortcode some conditions if you need them, to check values of attributes and display the content you want to display.( Make sure you read the notes under each field that has them ).</li>
+            <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may be handy when looking to change the specifications of a previously generated shortcode as you have chance to compare the code before actually committing to the code rewrite of the php file. ( I would not recommend those without coding experience to tamper with previously created shortcodes if they have used them already, unless the new one only adds NEW attributes or conditions while leaving everything else exactly the same. )</li>
+            <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional content below what is wrapped, or reference their values inside conditional content using the attribute reference syntax..</li>
+            <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal content above the wrapped element.</li>
             <li>Press "Generate Shortcode".</li>
             </ol>
             ';
@@ -202,6 +211,36 @@ class agsgPlugin
             $screen->add_help_tab(array(
                 'id' => 'sase',
                 'title' => 'Shortcode attribute syntax explained',
+                'content' => $help_content,
+            ));
+
+            $help_content = '<h3>Regenerate an existing shortcode</h3>
+            <p>Simply ensure the "Regenerate Code" option is set to "Yes".  I only advise those who are comfortable looking at PHP code to perform regenerations as if a shortcode has already been used and you regenerate it, then you change the way it works, your site might break.  The only way to prevent that is to make sure you ONLY extend the functionality of the shortcode and everything else remains the same.  Please be cautious using this.</p>
+            ';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'pgcbwtf',
+                'title' => 'Preview generated code before writing to file',
+                'content' => $help_content,
+            ));
+
+            $help_content = '<h3>Preview generated code before writing to file</h3>
+            <p>Simply ensure the "Preview Generated Code" option is set to "Yes"</p>
+            ';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'pgcbwtf',
+                'title' => 'Preview generated code before writing to file',
+                'content' => $help_content,
+            ));
+
+            $help_content = '<h3>Compare already existing shortcode function before writing regenerated code to file</h3>
+            <p>To compare an already existing shortcodes function to one you might want to replace it with is as simple as trying to generate a shortcode with the same tag without having "Regenerate Code" or "Preview Generated Code" options set to "Yes".  When these options are set to "No" the generator first trys to find a shortcode with that tag.  If it does then it will display the tag, old code, and proposed code so you can compare.  As long as you do not leave the page, you can do this as many times as needed so you can tweak your shortcode many times to get them working how you like.</p>
+            ';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'caesfbwrctf',
+                'title' => 'Compare already existing shortcode function before writing regenerated code to file',
                 'content' => $help_content,
             ));
         }
@@ -292,4 +331,28 @@ class agsgPlugin
         }
         return $path;
     }
+
+    public function addButton()
+    {
+        global $typenow;
+        // check user permissions
+        if (!current_user_can('edit_posts') && !current_user_can('edit_pages')) {
+            return;
+        }
+        // check if WYSIWYG is enabled
+        if (get_user_option('rich_editing') == 'true') {
+            add_filter("mce_external_plugins", array(&$this, 'addwptinyButton'));
+            add_filter('mce_buttons', array(&$this, 'registerwptinyButton'));
+        }
+    }
+
+//    public function addwptinyButton($plugin_array){ @todo Set up button when refactoring to WP Ajax - 1.1.0
+//        $plugin_array['agsg_shortcode_button'] = plugins_url( '/assets/js/button.js', __FILE__ ); // CHANGE THE BUTTON SCRIPT HERE
+//   	    return $plugin_array;
+//    }
+//
+//    public function registerwptinyButton($buttons){
+//       array_push($buttons, "agsg_shortcode_button");
+//       return $buttons;
+//    }
 }

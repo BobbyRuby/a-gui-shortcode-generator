@@ -508,11 +508,11 @@ jQuery(document).ready(function ($) {
                     jQuery(this).parent().prepend('<span class="error">Must not be empty.  Please fill in or remove.</span>');
                     err = true;
                 } else { // great its not blank... check for numbers at the beginning of the attribute - (numbers at beginning screw up variable generation)
-                    var att_name_matches = val.match(/(^[^0-9][a-z_0-9]+)/);
+                    var att_name_matches = val.match(/(^[0-9]+)/);
                     if (Array.isArray(att_name_matches) === true) {
                         jQuery(this).parent().parent().addClass('form-invalid');
                         jQuery(this).parent().find('.error').remove();
-                        jQuery(this).parent().prepend('<span class="error">Must not have number at beginning.  Please remove.  A good thing to do is place a letter before the number, so if setting up a fighter table for example you could this. Instead of an attribute named "1_wp" where "1" means "fighter number" and "wp" means "win percentage" you could do "f1_wp".</span>');
+                        jQuery(this).parent().prepend('<span class="error">Must not have number at beginning of shortcode.  Please remove.  Place a letter before the number, so for example, if setting up a fighter stats table, you could this. Instead of an attribute named "1_wp" where "1" means "fighter 1" and "wp" means "win percentage" you could do "f1_wp".</span>');
                     } else {
                         jQuery(this).parent().parent().removeClass('form-invalid');
                         jQuery(this).parent().find('.error').remove();

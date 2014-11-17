@@ -224,6 +224,7 @@ STRING;
         $var .=
 VARSTR;
                     $tinyMCE = str_replace('"', "'", $tinyMCE);
+                    $tinyMCE = preg_replace("(\\\\')", "'", $tinyMCE);
                     $this->shortcode_code .= <<<STRING
  "$tinyMCE";
     }

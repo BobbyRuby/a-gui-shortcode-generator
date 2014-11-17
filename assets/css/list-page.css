@@ -5,3 +5,25 @@
 span.error {
     color: red;
 }
+
+.search-container, .check-box-container {
+    float: right;
+}
+
+.search-response {
+    float: left;
+    width: 100%;
+    text-align: center;
+}
+
+.search-container {
+    width: 100%;
+}
+
+span.search-by {
+    margin-right: 10px;
+}
+
+p.error {
+    color: red;
+}
