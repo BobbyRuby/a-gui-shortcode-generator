@@ -25,12 +25,14 @@ abstract class agsgShortcodeGenerator
         $atts = $args['atts'];
         $mapped_atts = $args['mapped_atts'];
         $conditions = $args['conditions'];
+        $styles = $args['styles'];
+        $scripts = $args['scripts'];
         $preview = $args['preview'];
         $regenerate = $args['regenerate'];
 
         if (!$atts) $atts = array();
 
-        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions);
+        $this->shortcode = $this->createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $scripts, $styles);
         if ($preview)
             $this->shortcode->preview = $preview;
         if ($regenerate)
@@ -51,8 +53,8 @@ abstract class agsgShortcodeGenerator
                 $this->regenerate_shortcode_code(); // calls add to file
                 $this->print_shortcode_msg();
             }
-        } else if ($this->shortcode->regenerate && !$this->shortcode->exists) { // are we regenerating?  is must exist to regenerate
-            $this->shortcode->error_msg = 'Not Shortcode exists with the tag ' . $this->shortcode->tag;
+        } else if ($this->shortcode->regenerate && !$this->shortcode->exists) {
+            $this->shortcode->error_msg = 'No Shortcode exists with the tag ' . $this->shortcode->tag;
             $this->shortcode->error = true;
             $this->print_error_data('regen_not_possible');
         } else if (!$this->shortcode->exists) { // if one exists and there is a regen is set still add to file
@@ -81,11 +83,13 @@ abstract class agsgShortcodeGenerator
                     'name' => $this->shortcode->name,
                     'kind' => $this->shortcode->kind,
                     'tag' => $this->shortcode->tag,
+                    'description' => $this->shortcode->description,
                     'example' => $this->shortcode->example,
                     'code' => $this->shortcode->shortcode_code,
                     'created_datetime' => $date,
                 ),
                 array( // formats
+                    '%s',
                     '%s',
                     '%s',
                     '%s',
@@ -240,7 +244,9 @@ abstract class agsgShortcodeGenerator
      * @param array $atts - Multideminsional array containing shortcode attribute names and default values - array( 'names' => array( name0, name1, name2 ) , 'values' => array( 'value0', value1', value2'  ) );
      * @param array $mapped_atts - Multideminsional array containing html tag and shortcode attribute names that have been matched up or 'mapped' - array( 'match_html_att_names' => array( name0, name1, name2 ) , 'match_shortcode_att_names' => array( 'value0', value1', value2'  ) );
      * $param array $conditions - Multimdeminsional array containing conditions data
+     * $param array $scritps - Multimdeminsional array containing scripts data
+     * $param array $styles - Multimdeminsional array containing styles data
      * @return mixed
      */
-    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions); // the factory method to be implemented by concrete creator classes
+    abstract function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $scripts, $styles); // the factory method to be implemented by concrete creator classes
 }

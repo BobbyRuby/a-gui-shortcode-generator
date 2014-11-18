@@ -8,6 +8,8 @@ jQuery(document).ready(function ($) {
     var htmlTagATTList = []; // holds our html attributes
     var shortcodeTagATTList = []; // holds our shortcode attributes
     var conditionList = []; // holds our shortcode conditions
+    var scriptsList = []; // holds our shortcode scripts
+    var stylesList = []; // holds our shortcode styles
     var tinyMCEids = []; // holds our shortcode conditions tinyMCEs
     var serializedMatchData = [];
 
@@ -170,10 +172,18 @@ jQuery(document).ready(function ($) {
                     // value to check against
                     html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Value</th><td><input id="shortcode_condition_' + condition_id_num + '_value"" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value[]">' +
                         '<label for="shortcode_condition_' + condition_id_num + '_value"><span class="description">This is the value the value to check the shortcode attribute against using the operator above.<br/>' +
-                        '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
+                        '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
                         '</td></tr>';
                     // action to do if true
-                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here.</th><td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">Enter content you want displayed here.  Remember that you can reference any attribute named above using the shortcode attribute reference syntax.  They can be inserted anywhere you can place text in the TinyMCE editor.  Play around with it and don\'t hestistate to report a bug if you can find one.</textarea><br><label for="description"><span class="description">This is where you can add some conditional content to appear above the normally rendered content if this is an enclosing shortcode or decide what content is displayed if this is a self closing shortcode depending on an attribute value.</span></label></td></tr>';
+                    html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">' +
+                        'If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here.</th>' +
+                        '<td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">' +
+                        'Enter content you want displayed here.  Remember that you can reference any attribute named above using the shortcode attribute reference syntax.<br>' +
+                        'They can be inserted anywhere you can place text in the TinyMCE editor.  Play around with it and don\'t hestistate to report a bug if you can find one. DO NOT USE DOUBLE QUOTES FOR ANY HTML attribute values.' +
+                        '</textarea><br><label for=""><span class="shortcode_condition_' + condition_id_num + '_tinyMCE">This is where you add some conditional content.<br>' +
+                        '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It appears below the normally rendered content if this is an enclosing shortcode.</span><br>' +
+                        '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It is displayed if this is a self closing shortcode.</span><br>' +
+                        '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You must NOT use single quotations in any HTML attribute values.</span></label></span></label></td></tr>';
                     // push this id into the array
                     tinyMCEids.push('shortcode_condition_' + condition_id_num + '_tinyMCE');
 
@@ -224,7 +234,7 @@ jQuery(document).ready(function ($) {
      * End conditions section
      */
     /**
-     * Begin html tag section
+     * Begin html tag atts section
      */
         // listen for radio options of the has_html_tag_atts question
     jQuery('[name="agsg_has_html_tag_atts"]').change(function (e) {
@@ -301,7 +311,7 @@ jQuery(document).ready(function ($) {
         }
     });
     /**
-     * End html tag section
+     * End html tag atts section
      */
     /**
      * Begin atts section
@@ -312,7 +322,7 @@ jQuery(document).ready(function ($) {
         if (val == 'Yes') {
             shortcodeTagATTList.push('att_name');
             var html = '<tr class="template_name"><th scope="row">Attribute 1 Name</th><td><input type="text" value="" placeholder="" name="agsg_att_name[]" id="att_name">' +
-                '<label for="att_name"><span class="description">This is the name for the attribute <span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this attribute and the default vaule associated with it."></span></span></label>' +
+                '<label for="att_name"><span class="description">This is the name for the attribute <span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this attribute and the default value associated with it."></span></span></label>' +
                 '</td></tr>';
             html += '<tr class="template_value"><th scope="row">Attribute 1 Default Value</th><td><input type="text" value="" placeholder="" name="agsg_default[]" id="default">' +
                 '<label for="default"><span class="description">The default value for the attribute.</span></label>' +
@@ -387,6 +397,267 @@ jQuery(document).ready(function ($) {
     });
     /**
      * End atts section
+     */
+    /**
+     * Begin scripts section
+     */
+        // listen for radio options of the has_scripts question
+    jQuery('[name="agsg_has_scripts"]').change(function (e) {
+        var val = jQuery(this).val();
+        if (val == 'Yes') {
+            scriptsList.push('script_handle');
+
+            var html = '<tr class="template_script_handle"><th scope="row">Script 1 Handle</th><td><input type="text" value="" placeholder="" name="agsg_script_handle[]" id="script_handle">' +
+                '<label for="script_handle"><span class="description">This is the name for the script.<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this script and the data associated with it."></span></span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_script_src"><th scope="row">Script 1 Source</th><td><input type="text" value="" placeholder="" name="agsg_script_src[]" id="script_src">' +
+                '<label for="script_src"><span class="description">The URL on the server where the file resides.</span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_script_deps"><th scope="row">Script 1 Dependents</th><td><input type="text" value="" placeholder="" name="agsg_script_deps[]" id="script_deps">' +
+                '<label for="script_deps"><span class="description">The handles for the scripts this script depends on comma seperated.</span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_script_ver"><th scope="row">Script 1 Version</th><td><input type="text" value="" placeholder="" name="agsg_script_ver[]" id="script_ver">' +
+                '<label for="script_ver"><span class="description">The version of this script.</span></label>' +
+                '</td></tr>';
+
+            jQuery(this).parent().parent().parent().after(html);
+            // listen for shortcode scripts to keep input valid
+            jQuery('[name="agsg_script_handle[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '-', 'gi');
+                jQuery(this).val(val);
+            });
+            // listen for shortcode scripts to keep input valid
+            jQuery('[name="agsg_script_src[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '/', 'gi');
+                jQuery(this).val(val);
+            });
+            // listen for shortcode scripts to keep input valid
+            jQuery('[name="agsg_script_deps[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', ',', 'gi');
+                jQuery(this).val(val);
+            });
+            // listen for shortcode scripts to keep input valid
+            jQuery('[name="agsg_script_ver[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '.', 'gi');
+                jQuery(this).val(val);
+            });
+
+            jQuery('[for="script_handle"] .dashicons-dismiss').click(function (e) {
+                if (window.confirm("You will lose this script. Continue?")) {
+                    jQuery(this).parent().parent().parent().parent().next().next().next().remove();
+                    jQuery(this).parent().parent().parent().parent().next().next().remove();
+                    jQuery(this).parent().parent().parent().parent().next().remove();
+                    jQuery(this).parent().parent().parent().parent().remove();
+                    // cycle through list of shortcode ids
+                    for (var i = 0; i < scriptsList.length; i++) {
+                        // check current id is the same as the -this-
+                        if (scriptsList[i] === jQuery(this).parent().parent().prev().attr('id')) {
+                            scriptsList[i] = 0; // if so set this index to 0 so it won't be recognized in matching area
+                        }
+                    }
+                }
+            });
+            jQuery('#add_shortcode_script').show();
+        } else {
+            if (window.confirm("You will lose all scripts. Continue?")) {
+                jQuery('[name="agsg_script_handle[]"]').parent().parent().remove();
+                jQuery('[name="agsg_script_src[]"]').parent().parent().remove();
+                jQuery('[name="agsg_script_deps[]"]').parent().parent().remove();
+                jQuery('[name="agsg_script_ver[]"]').parent().parent().remove();
+                jQuery('#add_shortcode_script').hide();
+            }
+            else {
+                jQuery('#has_scripts_Yes').attr('checked', 'checked');
+            }
+        }
+    });
+    // listen for add script button
+    var script_name_count = jQuery('[name="agsg_script_handle[]"]').length;
+    jQuery('#add_shortcode_script').click(function (e) {
+        // count the names ( defaults will be the same)
+        script_name_count++;
+        var count = script_name_count + 1;
+
+        var handle_clone = jQuery('.template_script_handle').clone(true, true).removeClass('template_script_handle').removeClass('form-invalid');
+        jQuery("th", handle_clone).text('Script ' + count + ' Handle');
+        jQuery("input", handle_clone).attr('id', jQuery("input", handle_clone).attr('id') + '_' + count);
+        jQuery("label", handle_clone).attr('for', jQuery("label", handle_clone).attr('for') + '_' + count);
+        jQuery(".error", handle_clone).remove();
+
+        var src_clone = jQuery('.template_script_src').clone(true, true).removeClass('template_script_src').removeClass('form-invalid');
+        jQuery("th", src_clone).text('Script ' + count + ' Source');
+        jQuery("input", src_clone).attr('id', jQuery("input", src_clone).attr('id') + '_' + count);
+        jQuery("label", src_clone).attr('for', jQuery("label", src_clone).attr('for') + '_' + count);
+        jQuery(".error", src_clone).remove();
+
+        var deps_clone = jQuery('.template_script_deps').clone(true, true).removeClass('template_script_deps').removeClass('form-invalid');
+        jQuery("th", deps_clone).text('Script ' + count + ' Dependents');
+        jQuery("input", deps_clone).attr('id', jQuery("input", deps_clone).attr('id') + '_' + count);
+        jQuery("label", deps_clone).attr('for', jQuery("label", deps_clone).attr('for') + '_' + count);
+        jQuery(".error", deps_clone).remove();
+
+        var ver_clone = jQuery('.template_script_ver').clone(true, true).removeClass('template_script_ver').removeClass('form-invalid');
+        jQuery("th", ver_clone).text('Script ' + count + ' Version');
+        jQuery("input", ver_clone).attr('id', jQuery("input", ver_clone).attr('id') + '_' + count);
+        jQuery("label", ver_clone).attr('for', jQuery("label", ver_clone).attr('for') + '_' + count);
+        jQuery(".error", ver_clone).remove();
+
+        scriptsList.push('script_handle_' + count);
+
+        jQuery(".dashicons-dismiss", handle_clone).show();
+
+        count--;
+        if (!count == 1) {
+            jQuery('#script_ver' + '_' + count).parent().parent().after(ver_clone).after(deps_clone).after(src_clone).after(handle_clone);
+        } else {
+            jQuery('#script_ver').parent().parent().after(ver_clone).after(deps_clone).after(src_clone).after(handle_clone);
+        }
+    });
+    /**
+     * End scripts section
+     */
+    /**
+     * Begin styles section
+     */
+        // listen for radio options of the has_styles question
+    jQuery('[name="agsg_has_styles"]').change(function (e) {
+        var val = jQuery(this).val();
+        if (val == 'Yes') {
+            stylesList.push('style_handle');
+
+            var html = '<tr class="template_style_handle"><th scope="row">Style 1 Handle</th><td><input type="text" value="" placeholder="" name="agsg_style_handle[]" id="style_handle">' +
+                '<label for="style_handle"><span class="destyleion">This is the name for the style.<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this style and the data associated with it."></span></span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_style_src"><th scope="row">Style 1 Source</th><td><input type="text" value="" placeholder="" name="agsg_style_src[]" id="style_src">' +
+                '<label for="style_src"><span class="destyleion">The URL on the server where the file resides.</span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_style_deps"><th scope="row">Style 1 Dependents</th><td><input type="text" value="" placeholder="" name="agsg_style_deps[]" id="style_deps">' +
+                '<label for="style_deps"><span class="destyleion">The handles for the styles this style depends on comma seperated.</span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_style_ver"><th scope="row">Style 1 Version</th><td><input type="text" value="" placeholder="" name="agsg_style_ver[]" id="style_ver">' +
+                '<label for="style_ver"><span class="destyleion">The version of this style.</span></label>' +
+                '</td></tr>';
+
+            html += '<tr class="template_style_media"><th scope="row">Style 1 Media</th><td><input type="text" value="" placeholder="" name="agsg_style_media[]" id="style_media">' +
+                '<label for="style_media"><span class="destyleion">The media this style should apply to.</span></label>' +
+                '</td></tr>';
+
+            jQuery(this).parent().parent().parent().after(html);
+            // listen for shortcode styles to keep input valid
+            jQuery('[name="agsg_style_handle[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '-', 'gi');
+                jQuery(this).val(val);
+            });
+            // listen for shortcode styles to keep input valid
+            jQuery('[name="agsg_style_src[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '/', 'gi');
+                jQuery(this).val(val);
+            });
+            // listen for shortcode styles to keep input valid
+            jQuery('[name="agsg_style_deps[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', ',', 'gi');
+                jQuery(this).val(val);
+            });
+            // listen for shortcode styles to keep input valid
+            jQuery('[name="agsg_style_ver[]"]').change(function (e) {
+                var val = jQuery(this).val();
+                val = val.trim().replace(' ', '.', 'gi');
+                jQuery(this).val(val);
+            });
+            jQuery('[for="style_handle"] .dashicons-dismiss').click(function (e) {
+                if (window.confirm("You will lose this style. Continue?")) {
+                    jQuery(this).parent().parent().parent().parent().next().next().next().next().remove();
+                    jQuery(this).parent().parent().parent().parent().next().next().next().remove();
+                    jQuery(this).parent().parent().parent().parent().next().next().remove();
+                    jQuery(this).parent().parent().parent().parent().next().remove();
+                    jQuery(this).parent().parent().parent().parent().remove();
+                    // cycle through list of shortcode ids
+                    for (var i = 0; i < stylesList.length; i++) {
+                        // check current id is the same as the -this-
+                        if (stylesList[i] === jQuery(this).parent().parent().prev().attr('id')) {
+                            stylesList[i] = 0; // if so set this index to 0 so it won't be recognized in matching area
+                        }
+                    }
+                }
+            });
+            jQuery('#add_shortcode_style').show();
+        } else {
+            if (window.confirm("You will lose all styles. Continue?")) {
+                jQuery('[name="agsg_style_handle[]"]').parent().parent().remove();
+                jQuery('[name="agsg_style_src[]"]').parent().parent().remove();
+                jQuery('[name="agsg_style_deps[]"]').parent().parent().remove();
+                jQuery('[name="agsg_style_ver[]"]').parent().parent().remove();
+                jQuery('[name="agsg_style_media[]"]').parent().parent().remove();
+                jQuery('#add_shortcode_style').hide();
+            }
+            else {
+                jQuery('#has_styles_Yes').attr('checked', 'checked');
+            }
+        }
+    });
+    // listen for add style button
+    var style_name_count = jQuery('[name="agsg_style_handle[]"]').length;
+    jQuery('#add_shortcode_style').click(function (e) {
+        // count the names ( defaults will be the same)
+        style_name_count++;
+        var count = style_name_count + 1;
+
+        var handle_clone = jQuery('.template_style_handle').clone(true, true).removeClass('template_style_handle').removeClass('form-invalid');
+        jQuery("th", handle_clone).text('Style ' + count + ' Handle');
+        jQuery("input", handle_clone).attr('id', jQuery("input", handle_clone).attr('id') + '_' + count);
+        jQuery("label", handle_clone).attr('for', jQuery("label", handle_clone).attr('for') + '_' + count);
+        jQuery(".error", handle_clone).remove();
+
+        var src_clone = jQuery('.template_style_src').clone(true, true).removeClass('template_style_src').removeClass('form-invalid');
+        jQuery("th", src_clone).text('Style ' + count + ' Source');
+        jQuery("input", src_clone).attr('id', jQuery("input", src_clone).attr('id') + '_' + count);
+        jQuery("label", src_clone).attr('for', jQuery("label", src_clone).attr('for') + '_' + count);
+        jQuery(".error", src_clone).remove();
+
+        var deps_clone = jQuery('.template_style_deps').clone(true, true).removeClass('template_style_deps').removeClass('form-invalid');
+        jQuery("th", deps_clone).text('Style ' + count + ' Dependents');
+        jQuery("input", deps_clone).attr('id', jQuery("input", deps_clone).attr('id') + '_' + count);
+        jQuery("label", deps_clone).attr('for', jQuery("label", deps_clone).attr('for') + '_' + count);
+        jQuery(".error", deps_clone).remove();
+
+        var ver_clone = jQuery('.template_style_ver').clone(true, true).removeClass('template_style_ver').removeClass('form-invalid');
+        jQuery("th", ver_clone).text('Style ' + count + ' Version');
+        jQuery("input", ver_clone).attr('id', jQuery("input", ver_clone).attr('id') + '_' + count);
+        jQuery("label", ver_clone).attr('for', jQuery("label", ver_clone).attr('for') + '_' + count);
+        jQuery(".error", ver_clone).remove();
+
+        var media_clone = jQuery('.template_style_media').clone(true, true).removeClass('template_style_media').removeClass('form-invalid');
+        jQuery("th", media_clone).text('Style ' + count + ' Media');
+        jQuery("input", media_clone).attr('id', jQuery("input", media_clone).attr('id') + '_' + count);
+        jQuery("label", media_clone).attr('for', jQuery("label", media_clone).attr('for') + '_' + count);
+        jQuery(".error", media_clone).remove();
+
+        stylesList.push('style_handle_' + count);
+
+        jQuery(".dashicons-dismiss", handle_clone).show();
+
+        count--;
+        if (!count == 1) {
+            jQuery('#style_media' + '_' + count).parent().parent().after(media_clone).after(ver_clone).after(deps_clone).after(src_clone).after(handle_clone);
+        } else {
+            jQuery('#style_media').parent().parent().after(media_clone).after(ver_clone).after(deps_clone).after(src_clone).after(handle_clone);
+        }
+    });
+    /**
+     * End styles section
      */
     /**
      * Begin field .change modifications to force valid input
@@ -662,7 +933,7 @@ function loadTinyMCE(selector, existing_ids) {
             window.tinymce.dom.Event.domLoaded = true;
             tinymce.init({
                 selector: "textarea" + selector,
-                plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste emoticons paste textcolor colorpicker textpattern"],
+                plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu emoticons paste textcolor colorpicker textpattern"],
                 toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
                 toolbar2: "preview media | forecolor backcolor emoticons insertfile",
                 menubar: "tools table format view insert edit",
@@ -683,7 +954,7 @@ function loadTinyMCE(selector, existing_ids) {
         window.tinymce.dom.Event.domLoaded = true;
         tinymce.init({
             selector: "textarea" + selector,
-            plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu paste emoticons paste textcolor colorpicker textpattern"],
+            plugins: ["advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table contextmenu emoticons paste textcolor colorpicker textpattern"],
             toolbar1: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
             toolbar2: "preview media | forecolor backcolor emoticons insertfile",
             menubar: "tools table format view insert edit",

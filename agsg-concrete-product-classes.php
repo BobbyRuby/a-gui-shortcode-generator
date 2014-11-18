@@ -7,11 +7,15 @@
  */
 class agsgATT extends agsgShortcode
 {
-    public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description)
+    public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description, $scripts, $styles)
     {
 
         $this->name = $tag . '_agsg';
         $this->description = $description;
+        $this->conditions = $conditions;
+        $this->scripts = $scripts;
+        $this->att_names = $atts['names'];
+        $this->styles = $styles;
         $att_names = $atts['names'];
             $att_values = $atts['values'];
             $html_att_names = $html_atts['names'];
@@ -120,12 +124,12 @@ STRING;
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
-' id="$id"'.
+' id="$id'.
 STRING;
             }
             // add id and static classes
             $this->shortcode_code .= <<<STRING
-' class="$class '
+'" class="$class '
 STRING;
             // add attributed classes
             $this->shortcode_code .= <<<'VARSTR'
@@ -166,72 +170,14 @@ EOD;
 }
 VARSTR;
 
-        if (count($conditions)) {
-                foreach ($conditions as $condition) {
-                    $type = $condition["type"];
-                    $operator = $condition["operator"];
-                    $attribute = '$a[\'' . $condition["attribute"] . '\']';
-                    $value = $condition["value"];
-                    $tinyMCE = $condition["tinyMCE"];
-                    // parse tiny mce content and find references to attributes
-                    foreach ($att_names as $att_name) {
-                        // if attributes exist
-                        if (strpos($tinyMCE, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
-                            // get an array of just attributes to work with
-                            preg_match('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', $tinyMCE, $matches);
-                            // cycle through each, create var = value string, and add to array
-                            if (is_array($matches)) {
-                                foreach ($matches as $iv) {
-                                    $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', '$a[\'' . $att_name . '\']', $iv);
-                                    $ref_atts[] = "$$att_name = $iv";
-                                }
-                            } else {
-                                // get an array of just attributes to work with
-                                preg_match('/(<<[a-z_0-9]+>>)/', $tinyMCE, $matches);
-                                // cycle through each, create var = value string, and add to array
-                                if (is_array($matches)) {
-                                    foreach ($matches as $iv) {
-                                        $iv = preg_replace('/(<<[a-z_0-9]+>>)/', '$a[\'' . $att_name . '\']', $iv);
-                                        $ref_atts[] = "$$att_name = $iv";
-                                    }
-                                }
-                            }
-                        }
-                        // replace original with the att var generated
-                        $tinyMCE = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "$$att_name", $tinyMCE);
-                    }
-                    if (isset($ref_atts) && is_array($ref_atts)) {
-                        $ref_atts = array_unique($ref_atts);
-                    } else {
-                        $ref_atts = array();
-                    }
-                    if ($value === true || $value === false || $value === 0 || $value === 1) {
-                    } else {
-                        $value = "'$value'";
-                    }
-                    $this->shortcode_code .= <<<STRING
+        // build conditions
+        $this->buildConditions(); // adds all conditions to this->shortcode_code - uses this->conditions set above
+        // build scripts
+        $this->buildScripts(); // adds all scripts to this->shortcode_code - uses this->scripts set above
+        // build styles
+        $this->buildStyles(); // adds all styles to this->shortcode_code - uses this->styles set above
 
-    $type ( $attribute $operator $value ){
-STRING;
-                    foreach ($ref_atts as $ref_att) {
-                        $this->shortcode_code .= <<<STRING
-
-        $ref_att;
-STRING;
-                    }
-                    $this->shortcode_code .= <<<'VARSTR'
-
-        $var .=
-VARSTR;
-                    $tinyMCE = str_replace('"', "'", $tinyMCE);
-                    $tinyMCE = preg_replace("(\\\\')", "'", $tinyMCE);
-                    $this->shortcode_code .= <<<STRING
- "$tinyMCE";
-    }
-STRING;
-                }
-            }
-            $this->shortcode_code .= <<<'VARSTR'
+        $this->shortcode_code .= <<<'VARSTR'
 
     return $var;
 VARSTR;
@@ -280,12 +226,14 @@ STRING;
     }
 }
 
-class agsgNonATTenclosed extends agsgShortcode
+class agsgNonATT extends agsgShortcode
 {
-    public function __construct($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class)
+    public function __construct($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class, $scripts, $styles)
     {
             // set some info we want to store or use
             $this->name = $tag . '_agsg';
+        $this->scripts = $scripts;
+        $this->styles = $styles;
         $this->description = $description;
         $this->tag = $tag;
         $this->kind = 'NonATT';
@@ -305,7 +253,11 @@ EOD;
             $this->shortcode_code .= <<<'EOD'
 ( $atts, $content = null )
 EOD;
-            $this->shortcode_code .= <<<EOD
+        // build scripts
+        $this->buildScripts(); // adds all scripts to this->shortcode_code - uses this->scripts set above
+        // build styles
+        $this->buildStyles(); // adds all styles to this->shortcode_code - uses this->styles set above
+        $this->shortcode_code .= <<<EOD
 {
     return "$htmlstg
 EOD;

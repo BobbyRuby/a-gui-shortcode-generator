@@ -26,13 +26,12 @@ span.error {
     box-shadow: -1px 0 1px #000;
     color: white;
     padding: 10px 15px 15px 10px;
-    position: fixed;
-    right: 0px;
+    float: right;
     width: 250px;
     z-index: 100;
 }
 
-#add_shortcode_condition, #add_shortcode_att, #add_html_tag_att {
+#add_shortcode_condition, #add_shortcode_att, #add_html_tag_att, #add_shortcode_script, #add_shortcode_style {
     display: none;
     background: none repeat scroll 0 0 #111111;
     box-shadow: -1px 0 1px #000;
@@ -40,19 +39,32 @@ span.error {
     padding: 10px 15px 15px 10px;
     position: absolute;
     right: 0px;
-    width: 250px;
+    top: 0px;
+    width: 200px;
     zoom: 1;
     filter: alpha(opacity=1);
-    opacity: 0.1;
+    opacity: 1;
 }
 
-#add_shortcode_att:hover, #add_html_tag_att:hover, #add_shortcode_condition:hover {
+#add_shortcode_condition {
+    width: 210px;
+}
+
+#add_shortcode_style, #add_shortcode_script {
+    width: 150px;
+}
+
+#add_shortcode_script {
+    width: 140px;
+}
+
+#add_shortcode_att:hover, #add_html_tag_att:hover, #add_shortcode_condition:hover, #add_shortcode_script:hover, #add_shortcode_style:hover {
     background: none repeat scroll 0 0 #333;
     color: #2ea2cc;
     cursor: pointer;
     zoom: 0;
     filter: alpha(opacity=75);
-    opacity: 0.75;
+    opacity: 0.9;
 }
 
 .add_att_description {

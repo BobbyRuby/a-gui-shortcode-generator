@@ -11,67 +11,9 @@
  * License: See Envato for details
  */
 
-if ($_POST['form_info']) { //@todo Refactor to WP Ajax in 1.1.0
-    $wp_load = agsgPlugin::get_wp_load_path();
-    require_once($wp_load);
-    include_once('class-agsgShortcodeGenerator.php');
-    include_once('class-agsgShortcode.php');
-    include_once('agsg-concrete-creator-classes.php');
-    include_once('agsg-concrete-product-classes.php');
-    // grab serialized data
-    parse_str($_POST['form_info'], $inputs);
-    parse_str($_POST['matched_attributes'], $matched_atts);
-
-    $args['type'] = $_POST['type'];
-    $args['tag'] = $inputs['agsg_shortcode_tag_name'];
-    $args['description'] = $inputs['agsg_description'];
-    $args['allows_shortcodes'] = $inputs['agsg_process_shortcodes'];
-    $args['html_tag'] = $inputs['agsg_html_tag_name'];
-    $args['id'] = $inputs['agsg_id'];
-    $args['class'] = $inputs['agsg_class'];
-    $args['inline_styles'] = $inputs['agsg_inline_styles'];
-
-    $args['html_atts']['names'] = $inputs['agsg_html_tag_att_name'];
-    $args['html_atts']['values'] = $inputs['agsg_html_tag_default'];
-    $args['atts']['names'] = $inputs['agsg_att_name'];
-    $args['atts']['values'] = $inputs['agsg_default'];
-    $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
-    $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
-
-    $args['preview'] = ($inputs['agsg_preview'] === 'Yes') ? true : false;
-    $args['regenerate'] = ($inputs['agsg_regenerate'] === 'Yes') ? true : false;
-//    agsgPlugin::rfd_debugger($args,1);
-    // grab all conditions on the screen and create an array for each one that contains only the data for it if conditions exist
-    if ($inputs['agsg_has_conditions'] === 'Yes') {
-        for ($i = 0; $i < count($inputs['agsg_shortcode_condition_type']); $i++) {
-            $args['conditions'][$i]['type'] = $inputs['agsg_shortcode_condition_type'][$i];
-            $args['conditions'][$i]['attribute'] = $inputs['agsg_shortcode_condition_attribute'][$i];
-            $args['conditions'][$i]['operator'] = $inputs['agsg_shortcode_condition_operator'][$i];
-            $args['conditions'][$i]['value'] = $inputs['agsg_shortcode_condition_value'][$i];
-            $args['conditions'][$i]['tinyMCE'] = $inputs['agsg_shortcode_condition_tinyMCE'][$i];
-        }
-    }
-    // get kind
-    $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
-    if ($kind === 'ATT') {
-        $shortcode = new agsgATTgenerator();
-        $shortcode->generateShortcode($args);
-    } else if ($kind === 'NonATT') {
-        $shortcode = new agsgNonATTgenerator();
-        $shortcode->generateShortcode($args);
-    } else {
-    }
-
+if ($_POST['form_info']) { // @todo Refactor to WP Ajax in 1.1.0
+    agsgPlugin::generate();
     exit;
-//} elseif($_POST['shortcode_button_list']){  @todo Set up button when refactoring to WP Ajax - 1.1.0
-//    $wp_load = agsgPlugin::get_wp_load_path();
-//    require_once($wp_load);
-//    // get array of tag names and examples
-//    global $wpdb;
-//    $table = $wpdb->prefix.'agsg_shortcodes';
-//    $rows = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes", ARRAY_A);
-//    echo json_encode($rows);
-//    exit;
 } else // if not accessed by a post from this form
     if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
         // make sure it wasn't accessed directly
@@ -80,15 +22,18 @@ if ($_POST['form_info']) { //@todo Refactor to WP Ajax in 1.1.0
         add_action('admin_init', array('agsgPlugin', 'load_plugin')); // run this code once after install
         add_action('plugins_loaded', array('agsgPlugin', 'getInstance'), 10);
     }
-include_once('agsg_shortcodes.php');
-include_once('class-agsgSettings.php');
-include_once('agsgListPage.php');
 
+// includes
+include_once('agsg_shortcodes.php'); // file which holds shortcodes
+include_once('class-agsgSettings.php'); // settings class
+include_once('agsgListPage.php'); // list page class and related functions
 
 /**
  * Main Plugin Class
- * Installs, Updates, and calls all other classes for plugin besides Factory
+ * Installs, Updates, and calls all other classes for plugin.
  * @package WordPress
+ * Extend this class and override functions to extend, if you edit this file, MAKE SURE you save a copy.
+ * Please just extend the class by including via a require_once statement it in your php file which contains the class that extends it.  The function you need to override is generate().
  */
 class agsgPlugin
 {
@@ -100,7 +45,7 @@ class agsgPlugin
         // actions and filters
         add_action('current_screen', array(&$this, 'addHelp'));
         add_action('admin_print_styles', array(&$this, 'iconCss'));
-        add_action('admin_head', array(&$this, 'addButton'));
+//        add_action('admin_head', array(&$this, 'addButton')); @todo 1.1.0
         // in agsgListPage.php
         add_action('admin_menu', 'agsg_shortcode_add_menu_items');
         add_filter('set-screen-option', 'agsg_shortcode_per_page_set_screen_option', 10, 3);
@@ -124,16 +69,15 @@ class agsgPlugin
         add_option('agsgPluginVersion', '1.0.0'); // for version number and updates
         /* activation code here */
         global $wpdb;
-        // task_types Table - Used to hold all task types available in the system that can be assigned to jobs.  GREEN LIGHTED
         $table_name = $wpdb->prefix . "agsg_shortcodes";
         $sql = "CREATE TABLE $table_name (
           id INT NOT NULL AUTO_INCREMENT,
           type VARCHAR(11) NOT NULL,
           name VARCHAR(100) NOT NULL,
-          kind VARCHAR(6) NOT NULL,
+          kind VARCHAR(10) NOT NULL,
           tag VARCHAR(100) NOT NULL,
-          description VARCHAR(600) NOT NULL,
-          example VARCHAR(300) NOT NULL,
+          description VARCHAR(1000) NOT NULL,
+          example TEXT NOT NULL,
           code TEXT NOT NULL,
           created_datetime DATETIME NOT NULL,
           CONSTRAINT $table_name" . "_pk PRIMARY KEY (id)
@@ -142,6 +86,9 @@ class agsgPlugin
         dbDelta($sql);
     }
 
+    /**
+     * Function that will handle calling update function if/when db tables need adjusted.
+     */
     public static function load_plugin()
     {
         if (is_admin() && get_option('agsgPlugin') == 'agsg') {
@@ -150,12 +97,160 @@ class agsgPlugin
         }
     }
 
+    /**
+     * Loads WP along with shortcode factory to create correct product     *
+     */
+    public static function generate()
+    {
+        $wp_load = agsgPlugin::get_wp_load_path();
+        require_once($wp_load);
+        include_once('class-agsgShortcodeGenerator.php');
+        include_once('class-agsgShortcode.php');
+        include_once('agsg-concrete-creator-classes.php');
+        include_once('agsg-concrete-product-classes.php');
+        // grab serialized data
+        parse_str($_POST['form_info'], $inputs);
+        parse_str($_POST['matched_attributes'], $matched_atts);
+
+        $args['type'] = sanitize_text_field($_POST['type']);
+        $args['tag'] = sanitize_text_field($inputs['agsg_shortcode_tag_name']);
+        $description = nl2br($inputs['agsg_description']);
+        $description = preg_replace('#<\?.*?(\?>|$)#s', '', $description);
+        $args['description'] = $description;
+        $args['allows_shortcodes'] = sanitize_text_field($inputs['agsg_process_shortcodes']);
+        $args['html_tag'] = sanitize_text_field($inputs['agsg_html_tag_name']);
+        $args['id'] = sanitize_text_field($inputs['agsg_id']);
+        $args['class'] = sanitize_text_field($inputs['agsg_class']);
+        $args['inline_styles'] = $inputs['agsg_inline_styles'];
+
+        // loop through each sanitize
+        for ($i = 0; $i < count($inputs['agsg_html_tag_att_name']); $i++) {
+            $args['html_atts']['names'][] = sanitize_text_field($inputs['agsg_html_tag_att_name'][$i]);
+            $args['html_atts']['values'][] = sanitize_text_field($inputs['agsg_html_tag_default'][$i]);
+        }
+
+        // loop through each sanitize
+        for ($i = 0; $i < count($inputs['agsg_att_name']); $i++) {
+            $args['atts']['names'][] = sanitize_text_field($inputs['agsg_att_name'][$i]);
+            $args['atts']['values'][] = sanitize_text_field($inputs['agsg_default'][$i]);
+        }
+
+        $args['mapped_atts']['match_html_att_names'] = $matched_atts['match_html_tag_att_name'];
+        $args['mapped_atts']['match_shortcode_att_names'] = $matched_atts['match_att_name'];
+
+        $args['preview'] = ($inputs['agsg_preview'] === 'Yes') ? true : false;
+        $args['regenerate'] = ($inputs['agsg_regenerate'] === 'Yes') ? true : false;
+
+        // grab all conditions on the screen and create an array for each one that contains only the data for it if conditions exist
+        if ($inputs['agsg_has_conditions'] === 'Yes') {
+            // if statements (condition type)
+            for ($i = 0; $i < count($inputs['agsg_shortcode_condition_type']); $i++) {
+                $args['conditions'][$i]['type'] = $inputs['agsg_shortcode_condition_type'][$i];
+                $args['conditions'][$i]['attribute'] = $inputs['agsg_shortcode_condition_attribute'][$i];
+                $args['conditions'][$i]['operator'] = $inputs['agsg_shortcode_condition_operator'][$i];
+                $args['conditions'][$i]['value'] = $inputs['agsg_shortcode_condition_value'][$i];
+                $args['conditions'][$i]['tinyMCE'] = $inputs['agsg_shortcode_condition_tinyMCE'][$i];
+            }
+        }
+
+        // if scripts
+        if ($inputs['agsg_has_scripts'] === 'Yes') {
+            for ($i = 0; $i < count($inputs['agsg_script_handle']); $i++) {
+                $args['scripts'][$i]['handle'] = $inputs['agsg_script_handle'][$i];
+                $args['scripts'][$i]['src'] = $inputs['agsg_script_src'][$i];
+                $args['scripts'][$i]['deps'] = $inputs['agsg_script_deps'][$i];
+                $args['scripts'][$i]['ver'] = $inputs['agsg_script_ver'][$i];
+            }
+        }
+
+        // if styles
+        if ($inputs['agsg_has_styles'] === 'Yes') {
+            for ($i = 0; $i < count($inputs['agsg_style_handle']); $i++) {
+                $args['styles'][$i]['handle'] = $inputs['agsg_style_handle'][$i];
+                $args['styles'][$i]['src'] = $inputs['agsg_style_src'][$i];
+                $args['styles'][$i]['deps'] = $inputs['agsg_style_deps'][$i];
+                $args['styles'][$i]['ver'] = $inputs['agsg_style_ver'][$i];
+                $args['styles'][$i]['media'] = $inputs['agsg_style_media'][$i];
+            }
+        }
+        // get kind
+        $kind = ($inputs['agsg_has_atts'] === 'Yes') ? 'ATT' : 'NonATT';
+        if ($kind === 'ATT') {
+            $shortcode = new agsgATTgenerator();
+            $shortcode->generateShortcode($args);
+        } else if ($kind === 'NonATT') {
+            $shortcode = new agsgNonATTgenerator();
+            $shortcode->generateShortcode($args);
+        }
+
+//} elseif($_POST['shortcode_button_list']){  @todo Set up button when refactoring to WP Ajax - 1.1.0
+//    $wp_load = agsgPlugin::get_wp_load_path();
+//    require_once($wp_load);
+//    // get array of tag names and examples
+//    global $wpdb;
+//    $table = $wpdb->prefix.'agsg_shortcodes';
+//    $rows = $wpdb->get_results("SELECT * FROM $wpdb->prefix" . "agsg_shortcodes", ARRAY_A);
+//    echo json_encode($rows);
+    }
+
+//    /** @todo Set up inline code editing so developer customers can update code and examples from list page - 1.1.0
+//     * This function is called when editing the code on the list page after generation. I.E. it is called from the button
+//     * to submit code edits via the list page thickbox popup.  It does not update the example, that needs to be done manually
+//     * by the developer.
+//     */
+//    public static function processCodeEdit($tag, $code)
+//    {
+//        // call file code edit update function
+//        agsgPlugin::fileCodeEditUpdate($tag, $code);
+//        // call db code edit update function
+//        agsgPlugin::dbCodeEditUpdate($tag, $code);
+//    }
+//
+//    /**
+//     * Update agsg_shortcodes.php
+//     */
+//    public function fileCodeEditUpdate($tag, $code){
+//
+//    }
+//
+//    /**
+//     * Update $wpdb->prefix.'agsg_shortcodes' table
+//     */
+//    public static function dbCodeEditUpdate($tag, $code){
+//        global $wpdb;
+//        $table_name = $wpdb->prefix . "agsg_shortcodes";
+//        $wpdb->update(
+//            $table_name,
+//            array(
+//                'code' => $code
+//            ),
+//            array('tag' => $tag),
+//            array(
+//                '%s',
+//            ),
+//            array('%s')
+//        );
+//    }
+//
+//    /**
+//     * Called from list page to update the example
+//     */
+//    public static function exampleUpdate(){
+//
+//    }
+
+    /**
+     * load icon css
+     */
     public static function iconCss()
     {
         $assets_url = esc_url(trailingslashit(plugins_url('/assets/', __FILE__)));
         wp_enqueue_style('agsg-icon-css', $assets_url . 'css/icon-css.css');
     }
 
+    /**
+     * Adds Help Tabs
+     */
     public static function addHelp()
     {
         $screen = get_current_screen();
@@ -247,7 +342,7 @@ class agsgPlugin
     }
 
     /**
-     * Used for debugging - Adds help tab to show hooks for page
+     * Used for debugging - Adds help tab to show hooks for page - enable above by uncommenting the action call or in extended class if wished
      */
     public static function showHooks()
     {
@@ -298,6 +393,7 @@ class agsgPlugin
      * Another function for debugging
      * @param $debugItem
      * @param int $die
+     * Usage agsgPlugin::rfd_debugger() or call from extended class
      */
     public static function rfd_debugger($debugItem, $die = 0)
     {
@@ -312,6 +408,7 @@ class agsgPlugin
     /**
      * http://stackoverflow.com/questions/2354633/wordpress-root-directory-path
      * @return bool|mixed|string
+     * Wordpress Loader Function
      */
     public static function get_wp_load_path()
     {

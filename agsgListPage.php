@@ -81,6 +81,11 @@ class agsg_shortcode_table extends agsg_WP_List_Table
         );
     }
 
+    function column_description($item)
+    {
+        return $item['description'];
+    }
+
     function column_code($item)
     {
         $data = preg_replace('/[<]/', '&lt;', $item['code']);
@@ -421,7 +426,7 @@ function agsg_shortcode_render_list_page()
     <div class="search-container">
         <form method="post">
             <input type="hidden" name="page" value="<?php echo $shortcode_page ?>"/>
-            <?php $shortcode_list_table->search_box('Search by Name', $shortcode_page); ?>
+            <?php $shortcode_list_table->search_box('Search', $shortcode_page); ?>
             <div class="check-box-container">
                 <?php
                 $cols = $shortcode_list_table->get_search_cols();
@@ -478,16 +483,5 @@ function agsg_shortcode_render_list_page()
         $shortcode_list_table->display();
         ?>
     </form>
-    <div class="check-box-container-bottom">
-        <?php
-        echo "<span class='search-by'><strong>Search By:</strong></span>";
-        for ($i = 0; $i < count($cols); $i++) {
-            $col_k = $col_ks[$i];
-            echo "<label for='searchBy-" . $col_ks[$i] . "'> $cols[$col_k] </label>
-                <input id='searchBy" . $col_ks[$i] . "' type='checkbox' name='searchBy[]' value='" . $col_ks[$i] . "' />";
-        }
-        echo "<span class='search-by'><strong>For:</strong></span>";
-        ?>
-    </div>
 <?php
 }

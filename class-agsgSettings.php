@@ -1,4 +1,8 @@
 <?php
+/**
+ * Based off of http://www.hughlashbrooke.com/2014/02/complete-versatile-options-page-class-wordpress-plugin/
+ * Some simple changes to fit this implementation.
+ */
 if (!defined('ABSPATH')) exit;
 
 class agsgSettings
@@ -166,7 +170,7 @@ class agsgSettings
                         array(
                             'id' => 'has_html_tag_atts',
                             'label' => __('HTML Tag Attributes
-                                            <div id="add_html_tag_att"><span class="add_att_description">Add another HTML TAG attribute</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
+                                            <div id="add_html_tag_att"><span class="add_att_description">Add HTML TAG Attribute</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
                             'description' => __('You can give your HTML tag attributes.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> HTML attribute values can be set here or you can map them to shortcode attributes so that they can be set at the time of use.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> No need for an HTML "id", "class", or "style" attribute here, the HTML attributes are automatically mapped to shortcode attributes "id", "class", and "style" respectivley if they exist in <a id="has_atts_Yes-link" href="#has_atts_Yes">shortcode attributes area</a>.<br/>
@@ -193,9 +197,31 @@ class agsgSettings
                             'placeholder' => __('Describe the shortcode here.', 'plugin_textdomain')
                         ),
                         array(
+                            'id' => 'has_scripts',
+                            'label' => __('Shortcode External JS
+                                            <div id="add_shortcode_script"><span class="add_att_description">Add External JS</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
+                            'description' => __('You can give your shortcode JS here.<br/>
+                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Your scripts are only loaded when the shortcode is use.<br/>
+                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Your scripts are only loaded once no matter how many times you use the shortcode on the same page.', 'plugin_textdomain'),
+                            'type' => 'radio',
+                            'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
+                            'default' => __('No', 'plugin_textdomain')
+                        ),
+                        array(
+                            'id' => 'has_styles',
+                            'label' => __('Shortcode External CSS
+                                            <div id="add_shortcode_style"><span class="add_att_description">Add External CSS</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
+                            'description' => __('You can give your shortcode CSS here.<br/>
+                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Your styles are only loaded when the shortcode is use.<br/>
+                            <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Your styles are only loaded once no matter how many times you use the shortcode on the same page.', 'plugin_textdomain'),
+                            'type' => 'radio',
+                            'options' => array('Yes' => __('Yes', 'plugin_textdomain'), 'No' => __('No', 'plugin_textdomain')),
+                            'default' => __('No', 'plugin_textdomain')
+                        ),
+                        array(
                             'id' => 'has_atts',
                             'label' => __('Shortcode Attributes
-                                            <div id="add_shortcode_att"><span class="add_att_description">Add another shortcode attribute</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
+                                            <div id="add_shortcode_att"><span class="add_att_description">Add Shortcode Attribute</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
                             'description' => __('You can give your shortcode attributes that can be used to set attributes in the HTML.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> The "id" shortcode attribute will override the "ID" field above so you can change it up at the time of use, but do note that is will need a default value set, as when the "id" shortcode attribute exists the data in the "ID" field is ignored.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> The "html_tag" shortcode attribute will override the "HTML TAG Name" field above so you can change it up at the time of use, but do note this will need a default value set, as when the "html_tag" shortcode attribute exists the data in the "HTML TAG" Name field is ignored.<br/>
@@ -207,7 +233,7 @@ class agsgSettings
                         array(
                             'id' => 'has_conditions',
                             'label' => __('Shortcode Conditions
-                                            <div id="add_shortcode_condition"><span class="add_att_description">Add another shortcode condition</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
+                                            <div id="add_shortcode_condition"><span class="add_att_description">Add Shortcode Condition</span><span class="dashicons dashicons-plus-alt"></span></div>', 'plugin_textdomain'),
                             'description' => __('You can give your shortcode if statements that perform actions depending on attribute values.<br/>
                             <span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> You create the "Actions" using a TinyMCE module.<br/>
                             <span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You can reference the attributes for this shortcode in the TinyMCE editor like this "&lt;&lt;i_am_a_shortcode_att&gt;&gt;"', 'plugin_textdomain'),

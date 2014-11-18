@@ -28,27 +28,45 @@
 <body>
 <h1>A GUI Shortcode Generator Help File</h1>
 
-<p>Thank you very much for buying this plugin, I have put a great deal of work into it! I hope it lives up to your
-    expectations and more. All feature requests
+<p>Thank you very much for buying this plugin, I have put a great deal of work into it! I hope it exceeds your
+    expectations.. All feature requests
     and bug reports can be left on the product page comments area for now, all bugs reported will be fixed promptly and
     feature requests will taken into consideration. Do know I have a lot more planned for this plugin. See the <a
             href="#intheworks">In the Works</a> section for more details.<br/>
     I also owe the folks over at <a href="http://tinymce.com" target="_blank">TinyMCE</a> or <a
             href="http://www.moxiecode.com/" target="_blank">moxiecode</a> a big thanks for the great product they
-    provide. It really makes adds some more awesomeness to the plugin. Without it there would
-    be but a simple text area requiring the need for HTML knowledge to use the plugin. Please due note this file is
-    provided but you can find all this information in the "Help" tab in the upper right hand corner on the generator
+    provide. It really adds some more awesomeness to the plugin. Without it there would
+    be but a simple text area requiring the need for HTML knowledge to use the plugin.
+    I will be donating a portion of each purchase to them. I also want to give a shoutout to
+    <a href="http://www.hughlashbrooke.com/2014/02/complete-versatile-options-page-class-wordpress-plugin/">Hughlashbrooke</a>
+    for providing a
+    good settings class base.
+</p>
+
+<p>Please do note, this file is
+    provided but you can find all the help information found here in the "Help" tab in the upper right hand corner on
+    the generator
     page within WordPress.</p>
 
-<h2>Create a shortcode that surrounds content with an HTML element. (Enclosing)</h2></p>
+<h3>Jump to a Section:</h3>
+<nav>
+    <a href="#enclosing">Create a shortcode that surrounds content with an HTML element. (Enclosing)</a> |
+    <a href="#selfclosing">Create a shortcode that is replaced with content. (Self-Closing)</a> |
+    <a href="#attibutesyntax">Shortcode attribute syntax explained</a> |
+    <a href="#styles">Adding CSS to Shortcodes</a> |
+    <a href="#scripts">Adding JS to Shortcodes</a> |
+    <a href="#intheworks">In The Works for coming releases...</a>
+</nav>
+
+<h2 id="enclosing">Create a shortcode that surrounds content with an HTML element. (Enclosing)</h2></p>
 <ol>
     <li>Fill in the Shortcode Tag Name field. This should be as short as possible, unique, but as descriptive as
-        possible. ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when
+        possible. ( No need to have the "[]" as they will be stripped out and do not worry about the underscores, when
         you click out of the field it will put them in for you. ).
     </li>
-    <li>Fill in the HTML TAG Name field. ( Read notes under fields as this can be overriden )</li>
-    <li>Give your HTML element an id if you are making an enclosed shortcode. ( Read notes under fields as this can be
-        overriden ).
+    <li>Fill in the HTML TAG Name field. ( Read notes under fields as this can be overridden )</li>
+    <li>Give your HTML element an 'id' if you are making an enclosed shortcode. ( Read notes under fields as this can be
+        overridden ).
     </li>
     <li>Give your HTML element some base classes if you are making an enclosed shortcode. ( Read notes under fields as
         you can add to this set later using shortcode attribute "class" )
@@ -67,24 +85,24 @@
         already, unless the new one only adds NEW attributes or conditions while leaving everything else exactly the
         same. )
     </li>
-    <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional
+    <li>Add any external JS references you need.</li>
+    <li>Add any external CSS references you need.</li>
+    <li>Give your shortcode some attributes, if you need them, to map to your HTML attributes, display some conditional
         content below what is wrapped, or reference their values inside conditional content using the attribute
         reference syntax..
     </li>
-    <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal
-        content above the wrapped element.
+    <li>Give your shortcode some conditions, if you need them, to check values of attributes and display additonal
+        content below the wrapped element.
     </li>
     <li>Press "Generate Shortcode".</li>
 </ol>
-<h2>Create a shortcode that is replaced with content. (Self-Closing)</h2>
+<h2 id="selfclosing">Create a shortcode that is replaced with content. (Self-Closing)</h2>
 <ol>
     <li>Fill in the Shortcode Tag Name field. This should be as short as possible, unique, but as descriptive as
-        possible. ( No need to have the "[]" as they will be stirpped out and do not worry about the underscores, when
+        possible. ( No need to have the "[]" as they will be stripped out and do not worry about the underscores, when
         you click out of the field it will put them in for you. ).
     </li>
-    <li>Fill in the HTML TAG Name field ( This is just required even if it is not going to be used - You can just put
-        "blah" or better yet "self-closed", how about "ziptydoda" )
-    </li>
+    <li>Fill in the HTML TAG Name field. ( Read notes under fields as this can be overridden )</li>
     <li>Skip down to the describe your shortcode area.</li>
     <li>Describe your shortcode, this description is inserted in the code in a comment block before the function, it may
         be handy when looking to change the specifications of a previously generated shortcode as you have chance to
@@ -92,16 +110,16 @@
         without coding experience to tamper with previously created shortcodes if they have used them already, unless
         the new one only adds NEW attributes or conditions while leaving everything else exactly the same. )
     </li>
-    <li>Give your shortcode some attributes if you need them, to map to your HTML attributes, display some conditional
-        content below what is wrapped, or reference their values inside conditional content using the attribute
-        reference syntax..
+    <li>Give your shortcode some attributes, if you need them, to reference their values inside conditional content
+        using the attribute
+        reference syntax.
     </li>
-    <li>Give your shortcode some conditions if you need them, to check values of attributes and display additonal
-        content above the wrapped element.
+    <li>Give your shortcode some conditions, if you need them, to check values of attributes and display additonal
+        content below the wrapped element.
     </li>
     <li>Press "Generate Shortcode".</li>
 </ol>
-<h2>Shortcode attribute syntax explained</h2>
+<h2 id="attibutesyntax">Shortcode attribute syntax explained</h2>
 
 <p>The shortcode attribute syntax is based off of the same idea as the shortcodes themselves but instead of activating
     what is called a callback function, it just lets you embed variables within the generated shortcode functions. What
@@ -112,7 +130,7 @@
     <code>I just love all the cool design features of the &lt;&lt;link_text&gt;&gt;</code></p>
 
 <p>Here is an example assuming you have a shortcode attribute named "image":
-    <code>This is the best picture I've seen of the mountains &lt;&lt;image&gt;&gt;</code></p>
+    <code>This is the best picture I've ever seen of the mountains &lt;&lt;image&gt;&gt;</code></p>
 
 <p>In both of these examples the attribute names and the "<" ">" signs will be replaced with what ever value the
     attributes are equal to when using the shortcode they were created with.</p>
@@ -128,11 +146,23 @@
 
 <p>Simply ensure the "Preview Generated Code" option is set to "Yes"</p>
 
+
+<h2 id="styles">Adding CSS to Shortcodes</h2>
+
+<p>Simple specify the data requesting in the form.</p>
+
+<h2 id="scripts">Adding JS to Shortcodes</h2>
+
+<p>Currently the plugin only supports adding either inline scripts and internal scritps. Only double quotes should be
+    used.</p>
+
+
 <h2 id="intheworks">In The Works for coming releases...</h2>
 <strong>Looking to get all these in by 1.4.0. Until then it shouldn't be hard for you or someone else to customize the
     output to your needs. I will try provide some code samples that are copy and past solution in the coming weeks to
     load posts</strong>
 <ol>
+    <li>Add External JS Scripts</li>
     <li>Shortcode Button on Post Type Editing Screens</li>
     <li>Ability to build custom queries via the GUI interface to create shortcodes which load content dynamically (
         Think Recemt Post Shortcodes )
@@ -142,6 +172,5 @@
     <li>Post Type Meta Box Form</li>
     <li>Things people like you who buy the product say they want</li>
 </ol>
-
 </body>
 </html>
