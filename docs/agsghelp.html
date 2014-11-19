@@ -53,6 +53,8 @@
     <a href="#enclosing">Create a shortcode that surrounds content with an HTML element. (Enclosing)</a> |
     <a href="#selfclosing">Create a shortcode that is replaced with content. (Self-Closing)</a> |
     <a href="#attibutesyntax">Shortcode attribute syntax explained</a> |
+    <a href="#regenerate">Regenerate an existing shortcode</a> |
+    <a href="#compare">Compare already existing shortcode function before writing regenerated code to file</a> |
     <a href="#styles">Adding CSS to Shortcodes</a> |
     <a href="#scripts">Adding JS to Shortcodes</a> |
     <a href="#intheworks">In The Works for coming releases...</a>
@@ -135,7 +137,7 @@
 <p>In both of these examples the attribute names and the "<" ">" signs will be replaced with what ever value the
     attributes are equal to when using the shortcode they were created with.</p>
 
-<h2>Regenerate an existing shortcode</h2>
+<h2 id="regenerate">Regenerate an existing shortcode</h2>
 
 <p>Simply ensure the "Regenerate Code" option is set to "Yes". I only advise those who are comfortable looking at PHP
     code to perform regenerations as if a shortcode has already been used and you regenerate it, then you change the way
@@ -146,6 +148,14 @@
 
 <p>Simply ensure the "Preview Generated Code" option is set to "Yes"</p>
 
+<h2 id="compare">Compare already existing shortcode function before writing regenerated code to file</h2>
+
+<p>To compare an already existing shortcodes function to one you might want to replace it with is as simple as trying to
+    generate a shortcode with the same tag without having "Regenerate Code" or "Preview Generated Code" options set to
+    "Yes". When these options are set to "No" the generator first trys to find a shortcode with that tag. If it does
+    then it will display the tag, old code, and proposed code so you can compare. As long as you do not leave the page,
+    you can do this as many times as needed so you can tweak your shortcode many times to get them working how you
+    like.</p>
 
 <h2 id="styles">Adding CSS to Shortcodes</h2>
 
@@ -164,22 +174,21 @@
         double quotations ("). Single quotes (') will not work.
     </li>
     <li>You can use inline functions like onclick() and the like.</li>
-    <li>You can use external scripts by adding them in the correct area. ( Recommened )</li>
+    <li>You can use external scripts by adding them in the area provided in the form. ( Recommened )</li>
 </ol>
 
-
 <h2 id="intheworks">In The Works for coming releases...</h2>
-<strong>Looking to get all these in by 1.4.0. Until then it shouldn't be hard for you or someone else to customize the
-    output to your needs. I will try provide some code samples that are copy and past solution in the coming weeks to
-    load posts</strong>
+<strong>Looking to get all these in by 1.4.0. I plan on having monthly releases. Until then, it shouldn't be hard for
+    you or someone else to customize the
+    output to your needs. You can find code samples that are copy and past solutions at the <a
+            href="http://moezaick.com/agsg-demo/">demo site</a> for this plugin.</strong>
 <ol>
     <li>Shortcode Button on Post Type Editing Screens</li>
     <li>Ability to build custom queries to create shortcodes which load content dynamically (
         Think Recemt Post Shortcodes )
     </li>
-    <li>Inline code editing for shortcodes on list pages</li>
-    <li>Dashboard Meta Box Form</li>
-    <li>Post Type Meta Box Form</li>
+    <li>Inline code editing for shortcodes on list pages to enhance the management side of things</li>
+    <li>Thick box popup form accessed via top Admin bar</li>
     <li>Things people like you who buy the product say they want</li>
 </ol>
 </body>

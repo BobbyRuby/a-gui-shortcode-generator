@@ -338,6 +338,36 @@ class agsgPlugin
                 'title' => 'Compare already existing shortcode function before writing regenerated code to file',
                 'content' => $help_content,
             ));
+
+            $help_content = '<h3 id="styles">Adding CSS to Shortcodes</h3>
+            <p>There are two ways you can load CSS into the page where your shortcode is being used.</p>
+            <ol>
+                <li>You can use embedded or internal &lt;style&gt; body { background: #FFF; } ;&lt;/style&gt; tags.</li>
+                <li>You can use inline styling.</li>
+                <li>You can use external styles by adding them in the area provided in the form. ( Recommened )</li>
+            </ol>';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'addcss',
+                'title' => 'Adding CSS to Shortcodes',
+                'content' => $help_content,
+            ));
+
+            $help_content = '<h3 id="scripts">Adding JS to Shortcodes</h3>
+            <p>There are two ways you can load JS into the page where your shortcode is being used.</p>
+            <ol>
+                <li>You can use embedded or internal &lt;script&gt;alert("I\'m some JS");&lt;/script&gt; tags as long as you use ONLY
+                    double quotations ("). Single quotes (\') will not work.
+                </li>
+                <li>You can use inline functions like onclick() and the like.</li>
+                <li>You can use external scripts by adding them in the area provided in the form. ( Recommened )</li>
+            </ol>';
+            // Add help panel
+            $screen->add_help_tab(array(
+                'id' => 'addjs',
+                'title' => 'Adding JS to Shortcodes',
+                'content' => $help_content,
+            ));
         }
     }
 
