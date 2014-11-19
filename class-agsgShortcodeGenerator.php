@@ -10,6 +10,9 @@ abstract class agsgShortcodeGenerator
 {
     public $shortcode;
 
+    /**
+     * @param $args array cotaining all the data to call createShortcode. See createShortcode for an explanation of variables
+     */
     public function generateShortcode($args)
     {
         // grab all args from the array sent

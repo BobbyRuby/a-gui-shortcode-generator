@@ -14,8 +14,7 @@ class agsgATTgenerator extends agsgShortcodeGenerator
     public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $scripts, $styles)
     {
         /**
-         * To extend this plugin you can check the "type" here and call different product classes you create or you could always just make another generator class also but they must implement createShortcode in the same manner regardless of what the products use.
-         * I choose just a non attributed and attributed but it could be different
+         * To extend this plugin, just make another generator class that implements createShortcode in the same manner regardless of what the products use.  Make sure you include the main plugin file in your php file
          */
         $shortcode = new agsgATT($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description, $scripts, $styles);
         $shortcode->type = $type;
@@ -32,8 +31,7 @@ class agsgNonATTgenerator extends agsgShortcodeGenerator
     public function createShortcode($type, $tag, $description, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $scripts, $styles)
     {
         /**
-         * To extend this plugin you can check the "type" here and call different product classes you create or you could always just make another generator class also but they must implement createShortcode in the same manner regardless of what the products use.
-         * I choose just a non attributed and attributed but it could be different
+         * To extend this plugin, just make another generator class that implements createShortcode in the same manner regardless of what the products use.  Make sure you include the main plugin file in your php file
          */
         // get our open and close tags since were are going to wrap something rather than replace the shortcode and add in our classes/ids/inlineStyles while were at it
         $htmlTag = $this->getHtmlStartEndTag($htmlTag, $id, $class, $inlineStyle, $html_atts);

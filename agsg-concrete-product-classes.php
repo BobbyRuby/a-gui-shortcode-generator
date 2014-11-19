@@ -5,8 +5,28 @@
  * @package WordPress
  * @subpackage AGSG
  */
+/**
+ * Class agsgATT
+ * Responsible for creating the attributed shortcodes
+ */
 class agsgATT extends agsgShortcode
 {
+    /**
+     * See createShortcode function in agsgShortcodeGenerator for param explanations
+     * @param $tag
+     * @param $allowsShortcodes
+     * @param $htmlTag
+     * @param $id
+     * @param $class
+     * @param $inlineStyle
+     * @param $html_atts
+     * @param $atts
+     * @param $mapped_atts
+     * @param $conditions
+     * @param $description
+     * @param $scripts
+     * @param $styles
+     */
     public function __construct($tag, $allowsShortcodes, $htmlTag, $id, $class, $inlineStyle, $html_atts, $atts, $mapped_atts, $conditions, $description, $scripts, $styles)
     {
 
@@ -244,6 +264,18 @@ STRING;
 
 class agsgNonATT extends agsgShortcode
 {
+    /**
+     * See createShortcode function in agsgShortcodeGenerator for param explanations
+     * @param $htmlstg
+     * @param $htmletg
+     * @param $tag
+     * @param $allowsShortcodes
+     * @param $description
+     * @param $id
+     * @param $class
+     * @param $scripts
+     * @param $styles
+     */
     public function __construct($htmlstg, $htmletg, $tag, $allowsShortcodes, $description, $id, $class, $scripts, $styles)
     {
             // set some info we want to store or use

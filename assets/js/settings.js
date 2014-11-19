@@ -4,7 +4,7 @@
 jQuery(document).ready(function ($) {
 
     var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
-    var page = dir + 'class-agsgPlugin.php';
+    var page = dir + 'agsg.php';
     var htmlTagATTList = []; // holds our html attributes
     var shortcodeTagATTList = []; // holds our shortcode attributes
     var conditionList = []; // holds our shortcode conditions
