@@ -115,13 +115,17 @@ STRING;
             foreach ($this->styles as $style) {
                 $css_handle = '"' . $style['handle'] . '"';
                 $css_src = '"' . $style["src"] . '"';
-                $css_deps = explode(',', $style["deps"]);
-                $css_deps_str = 'array( ';
-                // build array string
-                foreach ($css_deps as $css_dep) {
-                    $css_deps_str .= "'$css_dep'";
+                if (isset($style["deps"]) && $style["deps"] !== '') {
+                    $css_deps = explode(',', $style["deps"]);
+                    $css_deps_str = 'array( ';
+                    // build array string
+                    foreach ($css_deps as $css_dep) {
+                        $css_deps_str .= "'$css_dep'";
+                    }
+                    $css_deps_str .= ' )';
+                }else{
+                    $css_deps_str = 'array()';
                 }
-                $css_deps_str .= ' )';
                 $css_ver = '"' . $style["ver"] . '"';
                 $css_media = '"' . $style["media"] . '"';
                 $this->shortcode_code .= <<<STRING
@@ -142,13 +146,17 @@ STRING;
             foreach ($this->scripts as $script) {
                 $js_handle = '"' . $script['handle'] . '"';
                 $js_src = '"' . $script["src"] . '"';
-                $js_deps = explode(',', $script["deps"]);
-                $js_deps_str = 'array( ';
-                // build array string
-                foreach ($js_deps as $js_dep) {
-                    $js_deps_str .= "'$js_dep'";
+                if (isset($script["deps"]) && $script["deps"] !== '') {
+                    $js_deps = explode(',', $script["deps"]);
+                    $js_deps_str = 'array( ';
+                    // build array string
+                    foreach ($js_deps as $js_dep) {
+                        $js_deps_str .= "'$js_dep'";
+                    }
+                    $js_deps_str .= ' )';
+                } else {
+                    $js_deps_str = 'array()';
                 }
-                $js_deps_str .= ' )';
                 $js_ver = '"' . $script["ver"] . '"';
                 $this->shortcode_code .= <<<STRING
 
