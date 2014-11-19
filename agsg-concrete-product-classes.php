@@ -104,13 +104,29 @@ VARSTR;
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
  $atts );
+    $id = '';
+    $classes = '';
+    $styles = '';
+    $html_tag = '';
+    if (isset($a['id'])) {
+        $id = $a['id'];
+    }
+    if (isset($a['class'])) {
+        $classes = $a['class'];
+    }
+    if (isset($a['style'])) {
+        $styles = $a['style'];
+    }
+    if (isset($a['html_tag'])) {
+        $html_tag = $a['html_tag'];
+    }
  if($content){
     $var =
 VARSTR;
             // is their an override for the html tag
             if ($this->htmlTagOR) {
                 $this->shortcode_code .= <<<'VARSTR'
-'<'.isset($a['html_tag']).
+'<'.$html_tag.
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
@@ -120,7 +136,7 @@ STRING;
             // is their an override for the id
             if ($this->html_id_OR) {
                 $this->shortcode_code .= <<<'VARSTR'
-' id="'.isset($a['id']).
+' id="'.$id.
 VARSTR;
             } else { // there isn't
                 $this->shortcode_code .= <<<STRING
@@ -133,14 +149,14 @@ STRING;
 STRING;
             // add attributed classes
             $this->shortcode_code .= <<<'VARSTR'
- .isset($a['class']).'"
+ .$classes.'"
 VARSTR;
             // add static and attributed inline_style
             $this->shortcode_code .= <<<STRING
  style="$inlineStyle
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
- '.isset($a['style']).'"
+ '.$styles.'"
 VARSTR;
             // add in the html attributes where values have NOT been mapped to shortcode attributes
             $this->shortcode_code .= <<<STRING
