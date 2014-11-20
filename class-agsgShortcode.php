@@ -45,10 +45,11 @@ abstract class agsgShortcode
                 $attribute = '$a[\'' . $condition["attribute"] . '\']';
                 $value = $condition["value"];
                 $tinyMCE = $condition["tinyMCE"];
+                $tinyMCE = preg_replace("#<script>(.*?)</script>#is", "", $tinyMCE);
                 // parse tiny mce content and find references to attributes
                 foreach ($this->att_names as $att_name) {
                     // if attributes exist
-                    if (strpos($tinyMCE, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
+                    if (strpos($tinyMCE, '&lt;&lt;' . $att_name . '&gt;&gt;') || strpos($tinyMCE, '<<' . $att_name . '>>')) {
                         // get an array of just attributes to work with
                         preg_match('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', $tinyMCE, $matches);
                         // cycle through each, create var = value string, and add to array
@@ -162,6 +163,85 @@ STRING;
 
 wp_enqueue_script( $js_handle, $js_src, $js_deps_str, $js_ver, true );
 STRING;
+            }
+        }
+    }
+
+    /**
+     * Build internal scripts if there are any
+     * Should be processed at the end after addShortcode
+     */
+    public function buildInternalScriptFunction()
+    {
+        if (count($this->conditions)) {
+            foreach ($this->conditions as $condition) {
+                $tinyMCE = $condition["tinyMCE"];
+                // find all script tags  -- @todo get a regex that works so scripts don't have to be at bottom of embed
+                $count = preg_match('#<script>(.*?)</script>#is', $tinyMCE, $intscripts);
+                // get everything between any script tags storing them each in index in intscripts array and how many in count
+                if ($count) {
+                    for ($i = 0; $i < $count; $i++) {
+                        $int_script_count = 'footer_intscript_' . $this->name;
+                        $intscript = str_replace('\"', "'", $intscripts[$i]);
+                        // parse $intscript and find references to attributes
+                        foreach ($this->att_names as $att_name) {
+                            // if attributes exist
+                            if (strpos($intscript, '<<' . $att_name . '>>') || strpos($intscript, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
+
+                                // get an array of just attributes to work with
+                                preg_match('/(<<[a-z_0-9]+>>)/', $intscript, $matches);
+                                // cycle through each, create var = value string, and add to array
+                                if (is_array($matches)) {
+                                    foreach ($matches as $iv) {
+                                        $iv = preg_replace('/(<<[a-z_0-9]+>>)/', '$a[\'' . $att_name . '\']', $iv);
+                                        $ref_atts[] = "$$att_name = $iv";
+                                    }
+                                } else {
+                                    // get an array of just attributes to work with
+                                    preg_match('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', $tinyMCE, $matches);
+                                    // cycle through each, create var = value string, and add to array
+                                    if (is_array($matches)) {
+                                        foreach ($matches as $iv) {
+                                            $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', '$a[\'' . $att_name . '\']', $iv);
+                                            $ref_atts[] = "$$att_name = $iv";
+                                        }
+                                    }
+                                }
+                            }
+                            // replace original with the att var generated
+                            $intscript = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "<?php echo $$att_name; ?>", $intscript);
+                            $intscript = str_replace('<<' . $att_name . '>>', "<?php echo $$att_name; ?>", $intscript);
+                        }
+
+                        $this->shortcode_code .= <<<STRING
+
+function $int_script_count() {
+STRING;
+                        $this->shortcode_code .= <<<'VARSTR'
+
+                        $a
+VARSTR;
+                        $this->shortcode_code .= <<<STRING
+ = $this->shortcodes_atts_str;
+STRING;
+                        $ref_atts = array_unique($ref_atts);
+                        foreach ($ref_atts as $ref_att) {
+                            $this->shortcode_code .= <<<STRING
+
+        $ref_att;
+STRING;
+                        }
+                        $this->shortcode_code .= <<<STRING
+
+        ?>
+        $intscript
+        <?php
+}
+add_action( 'wp_footer', '$int_script_count' );
+
+STRING;
+                    }
+                }
             }
         }
     }
