@@ -221,6 +221,9 @@ VARSTR;
 
 }
 add_shortcode( '$tag', '$this->name' );
+STRING;
+        $this->buildInternalScriptFunction();
+        $this->shortcode_code .= <<<STRING
 //$tag
 STRING;
     }
