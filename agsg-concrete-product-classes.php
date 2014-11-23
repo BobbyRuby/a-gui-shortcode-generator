@@ -105,8 +105,8 @@ STRING;
             // generate a typical use example
             $this->example = $this->generateExample($this->shortcode_atts); // $this->tag is set and ready to use so no need to use $tag $this->mapped_atts is set as well
 
-            // create shortcode class
-            $this->shortcode_code = <<<STRING
+        // create shortcode class
+        $this->shortcode_code = <<<STRING
 //$tag
 /**
 * Shortcode Class $this->name
@@ -120,7 +120,7 @@ STRING;
         protected static $current_use;
         protected static $total_count;
 VARSTR;
-            $this->shortcode_code .= <<<STRING
+        $this->shortcode_code .= <<<STRING
 
         // call back function for shortcode
         public function $name_cb (
@@ -137,7 +137,7 @@ STRING;
         $first_call = false;
         $current_use = self::$current_use;
 VARSTR;
-            $this->shortcode_code .= <<<'VARSTR'
+        $this->shortcode_code .= <<<'VARSTR'
 
         // initialize our attributes
         self::$a = shortcode_atts(
@@ -192,20 +192,20 @@ VARSTR;
 ' id="$id'.
 STRING;
             }
-            // add id and base classes
-            $this->shortcode_code .= <<<STRING
+        // add id and base classes
+        $this->shortcode_code .= <<<STRING
 '" class="$class '
 STRING;
             // add attributed classes
             $this->shortcode_code .= <<<'VARSTR'
  .$classes.'"
 VARSTR;
-            // add base inline_style
-            $this->shortcode_code .= <<<STRING
+        // add base inline_style
+        $this->shortcode_code .= <<<STRING
  style="$inlineStyle
 STRING;
-            // add attributed inline styles
-            $this->shortcode_code .= <<<'VARSTR'
+        // add attributed inline styles
+        $this->shortcode_code .= <<<'VARSTR'
  '.$styles.'"
 VARSTR;
             // add in the html attributes where values have NOT been mapped to shortcode attributes
@@ -238,6 +238,7 @@ VARSTR;
 
         // build conditions
         $this->buildConditions(); // adds all conditions to this->shortcode_code - uses this->conditions set above
+
         // build scripts
         $this->buildScripts(); // adds all scripts to this->shortcode_code - uses this->scripts set above
         // build styles
@@ -261,6 +262,9 @@ STRING;
 
     }
 
+    /**
+     * @return string
+     */
     public function generateExample()
     {
         $example = "Enclosing Example -- [$this->tag ";
@@ -270,7 +274,7 @@ STRING;
         $example .= "]Some shortcode content.[/$this->tag]<br/>";
         $example .= "Self Closing Example -- [$this->tag ";
         foreach ($this->shortcode_atts as $a => $dv) {
-            $example .= "$a=\"$dv\" ";
+            $example .= "$a=\"$dv\"";
         }
         $example .= " /]";
         return $example;

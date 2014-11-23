@@ -42,3 +42,15 @@ class agsgNonATTgenerator extends agsgShortcodeGenerator
         return $shortcode;
     }
 }
+
+/**
+ * Allow conditions inside the content that can be controlled by shortcode attributes, items in the globals array,
+ *
+ *
+ *
+ *
+ *
+ * Shortcode Types
+ * 1 - Enclosed shortcode with no shortcode attributes but has conditions for the content through using the globals array.
+ * 2 - Emclosed shortcode
+ */

@@ -176,9 +176,9 @@ STRING;
      */
     private function _buildInternalScriptFunction($tinyMCE)
     {
-                // find all script tags
-                $count = preg_match('#<script>(.*?)</script>#is', $tinyMCE, $intscripts);
-                // get everything between any script tags storing them each in index in intscripts array and how many in count
+        // find all script tags
+        $count = preg_match('#<script>(.*?)</script>#is', $tinyMCE, $intscripts);
+        // get everything between any script tags storing them each in index in intscripts array and how many in count
                 if ($count) {
                     for ($i = 0; $i < $count; $i++) {
                         $intscript = str_replace('\"', "'", $intscripts[$i]);
@@ -211,13 +211,13 @@ STRING;
                             $intscript = str_replace('<<' . $att_name . '>>', "<?php echo $$att_name; ?>", $intscript);
                         }
                         $var_string = '';
-                        if( isset($script_ref_use_atts) && is_array($script_ref_use_atts)){
+                        if (isset($script_ref_use_atts) && is_array($script_ref_use_atts)) {
                             $script_ref_use_atts = array_unique($script_ref_use_atts);
-                            for($j = 0; $j < count($script_ref_use_atts)*2; $j=$j+2){
-                                if($j === 0){
+                            for ($j = 0; $j < count($script_ref_use_atts) * 2; $j = $j + 2) {
+                                if ($j === 0) {
                                     $var_string = $script_ref_use_atts[$j];
-                                }else if($j % 2 == 0){
-                                    $var_string .= ', '.$script_ref_use_atts[$j];
+                                } else if ($j % 2 == 0) {
+                                    $var_string .= ', ' . $script_ref_use_atts[$j];
                                 }
                             }
                         }

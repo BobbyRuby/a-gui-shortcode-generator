@@ -3,15 +3,15 @@
  */
 
 // IIFE - Immediately Invoked Function Expression
-(function(yourcode) {
+(function (yourcode) {
 
     // The global jQuery object is passed as a parameter
     yourcode(window.jQuery, window, document);
 
-}(function($, window, document) {
+}(function ($, window, document) {
     // The $ is now locally scoped
     // Listen for the jQuery ready event on the document
-    $(function() {
+    $(function () {
         console.log('The DOM is ready');
         // The DOM is ready!
         var dir = jQuery('[name="agsg_install_url"]').val(); // dir url of install from hidden meta
@@ -932,6 +932,7 @@
         });
         return html;
     }
+
     /**
      * Loads TinyMCE's
      * @param selector - the current id of new textarea
