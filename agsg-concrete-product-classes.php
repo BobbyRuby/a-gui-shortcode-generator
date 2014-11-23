@@ -31,6 +31,7 @@ class agsgATT extends agsgShortcode
     {
 
         $this->name = $tag . '_agsg';
+        $name_cb = $this->name . '_cb';
         $this->description = $description;
         $this->conditions = $conditions;
         $this->scripts = $scripts;
@@ -94,7 +95,7 @@ class agsgATT extends agsgShortcode
  $filtered_html_att_names[$i]="'.
 STRING;
                 $match_str .= <<<'VARSTR'
-isset($a['
+isset(self::$a['
 VARSTR;
                 $match_str .= <<<STRING
 $filtered_shortcode_att_names[$i]']).'"
@@ -104,44 +105,72 @@ STRING;
             // generate a typical use example
             $this->example = $this->generateExample($this->shortcode_atts); // $this->tag is set and ready to use so no need to use $tag $this->mapped_atts is set as well
 
-            // create function
+            // create shortcode class
             $this->shortcode_code = <<<STRING
 //$tag
 /**
+* Shortcode Class $this->name
 * $this->description
 **/
-function $this->name (
+class $this->name {
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
- $atts, $content = null ) {
 
+        protected static $a;
+        protected static $current_use;
+        protected static $total_count;
+VARSTR;
+            $this->shortcode_code .= <<<STRING
+
+        // call back function for shortcode
+        public function $name_cb (
+STRING;
+        $this->shortcode_code .= <<<'VARSTR'
+ $atts, $content = null ) {
+        // get current use count
+        static $first_call = true;
+        if($first_call){
+            self::$current_use = 1;
+        }else{
+            self::$current_use++;
+        }
+        $first_call = false;
+        $current_use = self::$current_use;
 VARSTR;
             $this->shortcode_code .= <<<'VARSTR'
-    $a = shortcode_atts(
+
+        // initialize our attributes
+        self::$a = shortcode_atts(
 VARSTR;
             $this->shortcode_code .= <<<STRING
  $this->shortcodes_atts_str,
 STRING;
             $this->shortcode_code .= <<<'VARSTR'
  $atts );
-    $id = '';
-    $classes = '';
-    $styles = '';
-    $html_tag = '';
-    if (isset($a['id'])) {
-        $id = $a['id'];
-    }
-    if (isset($a['class'])) {
-        $classes = $a['class'];
-    }
-    if (isset($a['style'])) {
-        $styles = $a['style'];
-    }
-    if (isset($a['html_tag'])) {
-        $html_tag = $a['html_tag'];
-    }
- if($content){
-    $var =
+
+        $id = '';
+        $classes = '';
+        $styles = '';
+        $html_tag = '';
+
+        // get content and search for substring that matches our tag - get total count of how many time this shortcode has been used
+        $post_content = get_the_content();
+        self::$total_count = substr_count ( $post_content , '['.'image_slider_fixed' );
+
+        if (isset(self::$a['id'])) {
+            $id = self::$a['id'];
+        }
+        if (isset(self::$a['class'])) {
+            $classes = self::$a['class'];
+        }
+        if (isset(self::$a['style'])) {
+            $styles = self::$a['style'];
+        }
+        if (isset(self::$a['html_tag'])) {
+            $html_tag = self::$a['html_tag'];
+        }
+        if($content){
+            $var =
 VARSTR;
             // is their an override for the html tag
             if ($this->htmlTagOR) {
@@ -163,7 +192,7 @@ VARSTR;
 ' id="$id'.
 STRING;
             }
-            // add id and static classes
+            // add id and base classes
             $this->shortcode_code .= <<<STRING
 '" class="$class '
 STRING;
@@ -171,10 +200,11 @@ STRING;
             $this->shortcode_code .= <<<'VARSTR'
  .$classes.'"
 VARSTR;
-            // add static and attributed inline_style
+            // add base inline_style
             $this->shortcode_code .= <<<STRING
  style="$inlineStyle
 STRING;
+            // add attributed inline styles
             $this->shortcode_code .= <<<'VARSTR'
  '.$styles.'"
 VARSTR;
@@ -212,20 +242,23 @@ VARSTR;
         $this->buildScripts(); // adds all scripts to this->shortcode_code - uses this->scripts set above
         // build styles
         $this->buildStyles(); // adds all styles to this->shortcode_code - uses this->styles set above
-
         $this->shortcode_code .= <<<'VARSTR'
 
     return $var;
 VARSTR;
             $this->shortcode_code .= <<<STRING
 
-}
-add_shortcode( '$tag', '$this->name' );
+    } // end shortcode cb function
+
+} // end class
+add_shortcode( '$tag', array('$this->name', '$name_cb') );
 STRING;
-        $this->buildInternalScriptFunction();
         $this->shortcode_code .= <<<STRING
+
 //$tag
 STRING;
+
+
     }
 
     public function generateExample()

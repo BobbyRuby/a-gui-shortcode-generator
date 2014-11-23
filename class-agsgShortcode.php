@@ -42,10 +42,9 @@ abstract class agsgShortcode
             foreach ($this->conditions as $condition) {
                 $type = $condition["type"];
                 $operator = $condition["operator"];
-                $attribute = '$a[\'' . $condition["attribute"] . '\']';
+                $attribute = 'self::$a[\'' . $condition["attribute"] . '\']';
                 $value = $condition["value"];
                 $tinyMCE = $condition["tinyMCE"];
-                $tinyMCE = preg_replace("#<script>(.*?)</script>#is", "", $tinyMCE);
                 // parse tiny mce content and find references to attributes
                 foreach ($this->att_names as $att_name) {
                     // if attributes exist
@@ -55,7 +54,7 @@ abstract class agsgShortcode
                         // cycle through each, create var = value string, and add to array
                         if (is_array($matches)) {
                             foreach ($matches as $iv) {
-                                $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', '$a[\'' . $att_name . '\']', $iv);
+                                $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', 'self::$a[\'' . $att_name . '\']', $iv);
                                 $ref_atts[] = "$$att_name = $iv";
                             }
                         } else {
@@ -64,7 +63,7 @@ abstract class agsgShortcode
                             // cycle through each, create var = value string, and add to array
                             if (is_array($matches)) {
                                 foreach ($matches as $iv) {
-                                    $iv = preg_replace('/(<<[a-z_0-9]+>>)/', '$a[\'' . $att_name . '\']', $iv);
+                                    $iv = preg_replace('/(<<[a-z_0-9]+>>)/', 'self::$a[\'' . $att_name . '\']', $iv);
                                     $ref_atts[] = "$$att_name = $iv";
                                 }
                             }
@@ -84,24 +83,26 @@ abstract class agsgShortcode
                 }
                 $this->shortcode_code .= <<<STRING
 
-    $type ( $attribute $operator $value ){
+        $type ( $attribute $operator $value ){
 STRING;
                 foreach ($ref_atts as $ref_att) {
                     $this->shortcode_code .= <<<STRING
 
-        $ref_att;
+            $ref_att;
 STRING;
                 }
                 $this->shortcode_code .= <<<'VARSTR'
 
-        $var .=
+            $var .=
 VARSTR;
+                $tinyMCE = preg_replace("#<script>(.*?)</script>#is", "", $tinyMCE);
                 $tinyMCE = str_replace('"', "'", $tinyMCE);
                 $tinyMCE = preg_replace("(\\\\')", "'", $tinyMCE);
                 $this->shortcode_code .= <<<STRING
  "$tinyMCE";
-    }
+
 STRING;
+                $this->_buildInternalScriptFunction($condition['tinyMCE']); // adds closure functions for scripts and ending bracket for condition
             }
         }
     }
@@ -170,31 +171,28 @@ STRING;
     /**
      * Build internal scripts if there are any
      * Should be processed at the end after addShortcode
+     * @param $tinyMCE - Raw data from a tinyMCE to parse
+     * @param $var_string - PHP variables in the use() part of closure
      */
-    public function buildInternalScriptFunction()
+    private function _buildInternalScriptFunction($tinyMCE)
     {
-        if (count($this->conditions)) {
-            foreach ($this->conditions as $condition) {
-                $tinyMCE = $condition["tinyMCE"];
-                // find all script tags  -- @todo get a regex that works so scripts don't have to be at bottom of embed
+                // find all script tags
                 $count = preg_match('#<script>(.*?)</script>#is', $tinyMCE, $intscripts);
                 // get everything between any script tags storing them each in index in intscripts array and how many in count
                 if ($count) {
                     for ($i = 0; $i < $count; $i++) {
-                        $int_script_count = 'footer_intscript_' . $this->name;
                         $intscript = str_replace('\"', "'", $intscripts[$i]);
                         // parse $intscript and find references to attributes
                         foreach ($this->att_names as $att_name) {
                             // if attributes exist
                             if (strpos($intscript, '<<' . $att_name . '>>') || strpos($intscript, '&lt;&lt;' . $att_name . '&gt;&gt;')) {
-
                                 // get an array of just attributes to work with
                                 preg_match('/(<<[a-z_0-9]+>>)/', $intscript, $matches);
                                 // cycle through each, create var = value string, and add to array
                                 if (is_array($matches)) {
                                     foreach ($matches as $iv) {
-                                        $iv = preg_replace('/(<<[a-z_0-9]+>>)/', '$a[\'' . $att_name . '\']', $iv);
-                                        $ref_atts[] = "$$att_name = $iv";
+                                        $iv = preg_replace('/(<<[a-z_0-9]+>>)/', '$' . $att_name, $iv);
+                                        $script_ref_use_atts[] = "$iv";
                                     }
                                 } else {
                                     // get an array of just attributes to work with
@@ -202,8 +200,8 @@ STRING;
                                     // cycle through each, create var = value string, and add to array
                                     if (is_array($matches)) {
                                         foreach ($matches as $iv) {
-                                            $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', '$a[\'' . $att_name . '\']', $iv);
-                                            $ref_atts[] = "$$att_name = $iv";
+                                            $iv = preg_replace('/(\&lt\;\&lt\;[a-z_0-9]+\&gt\;\&gt\;)/', '$' . $att_name, $iv);
+                                            $script_ref_use_atts[] = "$iv";
                                         }
                                     }
                                 }
@@ -212,38 +210,43 @@ STRING;
                             $intscript = str_replace('&lt;&lt;' . $att_name . '&gt;&gt;', "<?php echo $$att_name; ?>", $intscript);
                             $intscript = str_replace('<<' . $att_name . '>>', "<?php echo $$att_name; ?>", $intscript);
                         }
-
-                        $this->shortcode_code .= <<<STRING
-
-function $int_script_count() {
-STRING;
+                        $var_string = '';
+                        if( isset($script_ref_use_atts) && is_array($script_ref_use_atts)){
+                            $script_ref_use_atts = array_unique($script_ref_use_atts);
+                            for($j = 0; $j < count($script_ref_use_atts)*2; $j=$j+2){
+                                if($j === 0){
+                                    $var_string = $script_ref_use_atts[$j];
+                                }else if($j % 2 == 0){
+                                    $var_string .= ', '.$script_ref_use_atts[$j];
+                                }
+                            }
+                        }
                         $this->shortcode_code .= <<<'VARSTR'
-
-                        $a
+    $cb =
 VARSTR;
                         $this->shortcode_code .= <<<STRING
- = $this->shortcodes_atts_str;
+ function () use ( $var_string ) {
 STRING;
-                        $ref_atts = array_unique($ref_atts);
-                        foreach ($ref_atts as $ref_att) {
-                            $this->shortcode_code .= <<<STRING
-
-        $ref_att;
-STRING;
-                        }
                         $this->shortcode_code .= <<<STRING
 
         ?>
         $intscript
         <?php
-}
-add_action( 'wp_footer', '$int_script_count' );
-
+}; // end closure function
 STRING;
+                        $this->shortcode_code .= <<<STRING
+
+add_action( 'wp_footer',
+STRING;
+                        $this->shortcode_code .= <<<'VARSTR'
+$cb );
+
+} // end condition
+
+VARSTR;
+
                     }
-                }
             }
-        }
     }
 
     abstract public function generateExample();
