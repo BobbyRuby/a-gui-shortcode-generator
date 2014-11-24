@@ -11,11 +11,11 @@
  * License: See Envato for details
  */
 
-if ($_POST['form_info']) { // @todo Refactor to WP Ajax in 1.1.0
+if ($_POST['form_info'] && $_POST['type'] && $_POST['matched_attributes']) {
     agsgPlugin::generate();
     exit;
 } else // if not accessed by a post from this form
-    if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['kind']) {
+    if (!$_POST['form_info'] && !$_POST['type'] && !$_POST['matched_attributes']) {
         // make sure it wasn't accessed directly
         if (!defined('ABSPATH')) exit;
         register_activation_hook(__FILE__, array('agsgPlugin', 'install')); // install plugin on activation
@@ -149,7 +149,9 @@ class agsgPlugin
                 $args['conditions'][$i]['attribute'] = $inputs['agsg_shortcode_condition_attribute'][$i];
                 $args['conditions'][$i]['operator'] = $inputs['agsg_shortcode_condition_operator'][$i];
                 $args['conditions'][$i]['value'] = $inputs['agsg_shortcode_condition_value'][$i];
-                $args['conditions'][$i]['tinyMCE'] = $inputs['agsg_shortcode_condition_tinyMCE'][$i];
+                if ($inputs['agsg_shortcode_condition_tinyMCE'][$i]) {
+                    $args['conditions'][$i]['tinyMCE'] = $inputs['agsg_shortcode_condition_tinyMCE'][$i];
+                }
             }
         }
 
@@ -457,6 +459,26 @@ class agsgPlugin
             $path = str_replace("\\", "/", $path);
         }
         return $path;
+    }
+
+    /**
+     * http://wordpress.stackexchange.com/questions/1665/getting-a-list-of-currently-available-roles-on-a-wordpress-site
+     * @return mixed
+     */
+    public static function get_editable_roles()
+    {
+        global $wp_roles;
+
+        $all_roles = $wp_roles->roles;
+        $editable_roles = apply_filters('editable_roles', $all_roles);
+
+        return $editable_roles;
+    }
+
+    public static function get_editable_caps()
+    {
+        $roles = self::get_editable_roles();
+
     }
 
     public function addButton()

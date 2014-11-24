@@ -125,7 +125,7 @@
             var val = jQuery(this).val();
             if (val == 'Yes') {
                 conditionList.push('shortcode_condition_type');
-                var html = '<tr class="type_template"><th scope="row">Select IF</th><td><select id="shortcode_condition_type" name="agsg_shortcode_condition_type[]"><option value="select">Select IF</option><option value="if">IF</option></select> ' +
+                var html = '<tr class="type_template"><th scope="row">Select Condition Type</th><td><select id="shortcode_condition_type" name="agsg_shortcode_condition_type[]"><option value="select">Select Condition Type</option><option value="if">IF</option><option value="if-else">IF-Else</option></select> ' +
                     '<label for="agsg_shortcode_condition_type[]"><span class="description"><br/>' +
                     '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> Use "IF" to do something when an attribute(s) evaluation is "TRUE".<span style="display: none;" class="dashicons dashicons-dismiss" title="Remove this condition and the data associated with it."></span><br/>' +
                     '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span> TinyMCE will not load TWICE for a condition. What this means is once you remove a condition, if you add it again, you will no longer have the editor so you must create conditions until you have passed the id number of the condition you deleted, then delete the conditions without TinyMCE unless you want to use HTML markup.<br/>' +
@@ -134,11 +134,21 @@
                 jQuery(this).parent().parent().parent().after(html);
                 jQuery('[for="agsg_shortcode_condition_type[]"] .dashicons-dismiss').click(function (e) {
                     if (window.confirm("You will lose this condition and its' data. Continue?")) {
+                        var condition_type = jQuery(this).parent().parent().prev().find('option:selected').val();
                         // check what condition was just set so the proper amount can be removed.
-                        jQuery(this).parent().parent().parent().parent().next().remove();
-                        jQuery(this).parent().parent().parent().parent().next().remove();
-                        jQuery(this).parent().parent().parent().parent().next().remove();
-                        jQuery(this).parent().parent().parent().parent().next().remove();
+                        if (condition_type == 'if') {
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                        }
+                        else if (condition_type == 'if-else') {
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                            jQuery(this).parent().parent().parent().parent().next().remove();
+                        }
                         jQuery(this).parent().parent().parent().parent().remove();
 
                         // cycle through list of condition ids
@@ -153,57 +163,153 @@
                 jQuery('#shortcode_condition_type').change(function (e) {
                     var val = jQuery(this).find('option:selected').val();
                     var html = '';
-                    if (jQuery(this).attr('id') == 'shortcode_condition_type') {
-                        var condition_id_num = jQuery(this).attr('id').replace('shortcode_condition_type', '');
+                    var id = jQuery(this).attr('id');
+                    if (id == 'shortcode_condition_type') {
+                        var condition_id_num = id.replace('shortcode_condition_type', '');
                         condition_id_num = 1;
                     } else {
-                        var condition_id_num = jQuery(this).attr('id').replace('shortcode_condition_type_', '');
+                        var condition_id_num = id.replace('shortcode_condition_type_', '');
                     }
-                    var loadTiny = false;
+                    var condition_id = 'shortcode_condition_' + condition_id_num;
                     if (val == 'select') {
                         jQuery(this).parent().parent().parent().find('.for_condition_number_' + condition_id_num).remove();
                     }
                     else if (val == 'if') {
-                        loadTiny = true;
-                        // attribute to evaluate
-                        html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Evaluate Attribute</th><td><select id="shortcode_condition_' + condition_id_num + '_attribute" class="shortcode_condition_attribute" name="agsg_shortcode_condition_attribute[]">';
+                        jQuery(this).attr("disabled", "disabled");
+                        // to evaluate 1
+                        html += '<tr class="' + condition_id + '"><th scope="row">Evaluate 1</th><td><select id="' + condition_id + '_eval_1" class="shortcode_condition_attribute" name="agsg_shortcode_condition_eval_1[]">';
                         html += getShortcodeAttributeOptionsList();
-                        html += '</select><label for="shortcode_condition_' + condition_id_num + '_attribute"><span class="description">This is the shortcode attribute you want to check the value of.</span></label>' +
-                            '<div id="reset_for_attribute_condition_number_' + condition_id_num + '" class="reset_condition_container"><span class="reset_condition">Reset these options</span><span class="dashicons dashicons-randomize"></span></div></td></tr>';
+                        html += getGlobalVarOptionsList();
+                        html += '</select><label for="' + condition_id + '_eval_1"><span class="description">This is the first shortcode attribute or variable you want to check the value of, it is required.</span></label>' +
+                            '<div id="reset_for_' + condition_id + '_eval_1" class="reset_condition_container"><span class="reset_condition">Reset these options</span><span class="dashicons dashicons-randomize"></span></div></td></tr>';
+                        // to evaluate 2
+                        html += '<tr class="' + condition_id + '"><th scope="row">Evaluate 2</th><td><select id="' + condition_id + '_eval_2" class="shortcode_condition_attribute" name="agsg_shortcode_condition_eval_2[]">';
+                        html += getShortcodeAttributeOptionsList();
+                        html += getGlobalVarOptionsList();
+                        html += '</select><label for="' + condition_id + '_eval_2"><span class="description">This is the second shortcode attribute or variable you want to check the value of, it is optional.</span></label>' +
+                            '<div id="reset_for_' + condition_id + '_eval_2" class="reset_condition_container"><span class="reset_condition">Reset these options</span><span class="dashicons dashicons-randomize"></span></div></td></tr>';
 
-                        // operator type == / <= / >= / < / >
-                        html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Operator</th><td><select id="shortcode_condition_' + condition_id_num + '_operator" class="shortcode_condition_operator" name="agsg_shortcode_condition_operator[]">';
+                        // operator type 1 == / <= / >= / < / >
+                        html += '<tr class="' + condition_id + '"><th scope="row">Operator 1</th><td><select id="' + condition_id + '_operator_1" class="shortcode_condition_operator" name="agsg_shortcode_condition_operator_1[]">';
                         html += '<option value="==">equal to value</option>' +
                             '<option value="!=">not equal to value</option>' +
                             '<option value="<=">less than or equal to value</option>' +
                             '<option value="<">less than value</option>' +
                             '<option value=">=">greater than or equal to value</option>' +
                             '<option value=">">greater than value</option>' +
-                            '</select><label for="shortcode_condition_' + condition_id_num + '_operator"><span class="description">This is the operator to use in evaluating the shortcode attribute you want to check against the value you input in the text field below.</span></label>';
-                        // value to check against
-                        html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">Value</th><td><input id="shortcode_condition_' + condition_id_num + '_value"" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value[]">' +
-                            '<label for="shortcode_condition_' + condition_id_num + '_value"><span class="description">This is the value the value to check the shortcode attribute against using the operator above.<br/>' +
+                            '</select><label for="' + condition_id + '_operator_1"><span class="description">This is the first operator to use in evaluating the shortcode attribute or variable you want to check against value 1, it is required.</span></label>';
+
+                        // operator type 2 == / <= / >= / < / >
+                        html += '<tr class="' + condition_id + '"><th scope="row">Operator 2</th><td><select id="' + condition_id + '_operator_2" class="shortcode_condition_operator" name="agsg_shortcode_condition_operator_2[]">';
+                        html += '<option value="==">equal to value</option>' +
+                            '<option value="!=">not equal to value</option>' +
+                            '<option value="<=">less than or equal to value</option>' +
+                            '<option value="<">less than value</option>' +
+                            '<option value=">=">greater than or equal to value</option>' +
+                            '<option value=">">greater than value</option>' +
+                            '</select><label for="' + condition_id + '_operator_2"><span class="description">This is the first operator to use in evaluating the shortcode attribute or variable you want to check against value 2, it is optional</span><br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span>This field will be ignored if "Evaluate 2" has no selection.</span></label>';
+
+                        // value 1 to check against
+                        html += '<tr class="' + condition_id + '"><th scope="row">Value 1</th><td><input id="' + condition_id + '_value_1" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value_1[]">' +
+                            '<label for="' + condition_id + '_value_1"><span class="description">This is the value to check the shortcode attribute or variable against using the operator 1 above, it is required only when "Evaluate 2" field has been selected.<br/>' +
                             '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
                             '</td></tr>';
+
+                        // value 2 to check against
+                        html += '<tr class="' + condition_id + '"><th scope="row">Value 2</th><td><input id="' + condition_id + '_value_2" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value_2[]">' +
+                            '<label for="' + condition_id + '_value_2"><span class="description">This is the value to check the shortcode attribute or variable against using the operator 2 above.<br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Important Note:</span> This field will be ignored if "Evaluate 2" has no selection.</span><br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> If you leave this blank and you have selected something for the "Evaluate 2" field, it will be considered an empty string.</span></label>' +
+                            '</td></tr>';
+
+                        // Relation between expressions above
+                        html += '<tr class="' + condition_id + '"><th scope="row">Relation between expressions 1 and 2.</th><td><input id="' + condition_id + '_value_2" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value_2[]">' +
+                            '<label for="' + condition_id + '_value_2"><span class="description">This is where you tell the generator how it needs to treat the expressions created by the fields above to deal with them inside the conditional created.</span><br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> This field will be ignored if "Evaluate 2" has no selection.</span><br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> Expression 1 is made up of the "Evaluate 1", "Operator 1", and "Value 1"</span><br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> Expression 2 is made up of the "Evaluate 2", "Operator 2", and "Value 2"</span></label>' +
+                            '</td></tr>';
+
                         // action to do if true
-                        html += '<tr class="for_condition_number_' + condition_id_num + '"><th scope="row">' +
+                        html += '<tr class="' + condition_id + '"><th scope="row">' +
                             'If the evaluation of the attribute selected and the value entered using the operator selected results to true, display the content entered here.</th>' +
-                            '<td><textarea name="agsg_shortcode_condition_tinyMCE[]" cols="50" rows="5" id="shortcode_condition_' + condition_id_num + '_tinyMCE">' +
+                            '<td><textarea name="agsg_shortcode_condition_tinyMCE_true[]" cols="50" rows="5" id="' + condition_id + '_tinyMCE_true">' +
                             'Enter content you want displayed here.  Remember that you can reference any attribute named above using the shortcode attribute reference syntax.<br>' +
                             'They can be inserted anywhere you can place text in the TinyMCE editor.  Play around with it and don\'t hestistate to report a bug if you can find one. DO NOT USE DOUBLE QUOTES FOR ANY HTML attribute values.' +
-                            '</textarea><br><label for=""><span class="shortcode_condition_' + condition_id_num + '_tinyMCE">This is where you add some conditional content.<br>' +
+                            '</textarea><br><label for="' + condition_id + '_tinyMCE_true"><span class="' + condition_id + '_tinyMCE">This is where you add some conditional content.<br>' +
                             '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It appears below the normally rendered content if this is an enclosing shortcode.</span><br>' +
                             '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It is displayed if this is a self closing shortcode.</span><br>' +
                             '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You must NOT use single quotations in any HTML attribute values.</span></label></span></label></td></tr>';
                         // push this id into the array
-                        tinyMCEids.push('shortcode_condition_' + condition_id_num + '_tinyMCE');
+                        tinyMCEids.push('#' + condition_id + '_tinyMCE_true');
+                        loadTinyMCE('#' + condition_id + '_tinyMCE_true', tinyMCEids);
+                    } else if (val == 'if-else') {
+                        jQuery(this).attr("disabled", "disabled");
+                        condition_id += '_if_else';
+                        // attribute to evaluate
+                        html += '<tr class="' + condition_id + '"><th scope="row">Evaluate Attribute</th><td><select id="' + condition_id + '_eval_1" class="shortcode_condition_attribute" name="agsg_shortcode_condition_eval_1[]">';
+                        html += getShortcodeAttributeOptionsList();
+                        html += '</select><label for="' + condition_id + '_eval_1"><span class="description">This is the shortcode attribute you want to check the value of.</span></label>' +
+                            '<div id="reset_for_attribute_condition_number_' + condition_id_num + '" class="reset_condition_container"><span class="reset_condition">Reset these options</span><span class="dashicons dashicons-randomize"></span></div></td></tr>';
 
+                        // operator type == / <= / >= / < / >
+                        html += '<tr class="' + condition_id + '"><th scope="row">Operator</th><td><select id="' + condition_id + '_operator" class="shortcode_condition_operator" name="agsg_shortcode_condition_operator[]">';
+                        html += '<option value="==">equal to value</option>' +
+                            '<option value="!=">not equal to value</option>' +
+                            '<option value="<=">less than or equal to value</option>' +
+                            '<option value="<">less than value</option>' +
+                            '<option value=">=">greater than or equal to value</option>' +
+                            '<option value=">">greater than value</option>' +
+                            '</select><label for="' + condition_id + '_operator"><span class="description">This is the operator to use in evaluating the shortcode attribute you want to check against the value you input in the text field below.</span></label>';
+                        // value to check against
+                        html += '<tr class="' + condition_id + '"><th scope="row">Value</th><td><input id="' + condition_id + '_value" class="shortcode_condition_value" type="text" value="" placeholder="" name="agsg_shortcode_condition_value[]">' +
+                            '<label for="' + condition_id + '_value"><span class="description">This is the value the value to check the shortcode attribute against using the operator above.<br/>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span>If you leave this blank it will be considered an empty string.</span></label>' +
+                            '</td></tr>';
+                        // content to do if true
+                        html += '<tr class="' + condition_id + '"><th scope="row">' +
+                            'If the evaluation results to TRUE, display the content entered here.</th>' +
+                            '<td><textarea name="agsg_shortcode_condition_tinyMCE_true[]" cols="50" rows="5" id="' + condition_id + '_tinyMCE_true">' +
+                            'Enter content you want displayed here.  Remember that you can reference any attribute named above using the shortcode attribute reference syntax.<br>' +
+                            'They can be inserted anywhere you can place text in the TinyMCE editor.  Play around with it and don\'t hestistate to report a bug if you can find one. DO NOT USE DOUBLE QUOTES FOR ANY HTML attribute values.' +
+                            '</textarea><br><label for="' + condition_id + '_tinyMCE_true"><span class="' + condition_id + '_tinyMCE">This is where you add some conditional content.<br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It appears below the normally rendered content if this is an enclosing shortcode.</span><br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It is displayed if this is a self closing shortcode.</span><br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You must NOT use single quotations in any HTML attribute values.</span></label></span>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">This content is displayed if the evaluation is TRUE.</span></label></span></label></td></tr>';
+                        // push this id into the array
+                        tinyMCEids.push(condition_id + '_tinyMCE_true');
+
+                        // content to do if false
+                        html += '<tr class="' + condition_id + '"><th scope="row">' +
+                            'If the evaluation results to FALSE, display the content entered here.</th>' +
+                            '<td><textarea name="agsg_shortcode_condition_tinyMCE_else[]" cols="50" rows="5" id="' + condition_id + '_tinyMCE_else">' +
+                            'Enter content you want displayed here.  Remember that you can reference any attribute named above using the shortcode attribute reference syntax.<br>' +
+                            'They can be inserted anywhere you can place text in the TinyMCE editor.  Play around with it and don\'t hestistate to report a bug if you can find one. DO NOT USE DOUBLE QUOTES FOR ANY HTML attribute values.' +
+                            '</textarea><br><label for="' + condition_id + '_tinyMCE_false"><span class="' + condition_id + '_tinyMCE">This is where you add some conditional content.<br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It appears below the normally rendered content if this is an enclosing shortcode.</span><br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog"></span><span class="important">Important Note:</span> It is displayed if this is a self closing shortcode.</span><br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">Very Important Note:</span> You must NOT use single quotations in any HTML attribute values.</span></label></span><br>' +
+                            '<span class="dashicons dashicons-welcome-write-blog error"></span><span class="important error">This content is displayed if the evaluation is FALSE.</span></label></span></label></td></tr>';
+                        // push this id into the array
+                        tinyMCEids.push(condition_id + '_tinyMCE_else');
+
+                        loadTinyMCE('#' + condition_id + '_tinyMCE_true', tinyMCEids);
+                        setTimeout(1000,
+                            loadTinyMCE('#' + condition_id + '_tinyMCE_else', tinyMCEids));
                     }
                     jQuery(this).parent().parent().after(html);
-                    if (loadTiny) loadTinyMCE('#shortcode_condition_' + condition_id_num + '_tinyMCE', tinyMCEids); // load if needed
-                    // set reset button
-                    jQuery('#reset_for_attribute_condition_number_' + condition_id_num).click(function (e) {
-                        jQuery('#shortcode_condition_' + condition_id_num + '_attribute').html(getShortcodeAttributeOptionsList('reset'));
+
+                    // set reset button 1
+                    jQuery('#reset_for_' + condition_id + '_eval_1').click(function (e) {
+                        jQuery('#' + condition_id + '_eval_1').html(
+                            getShortcodeAttributeOptionsList('reset') + getGlobalVarOptionsList());
+                    });
+                    // set reset button 2
+                    jQuery('#reset_for_' + condition_id + '_eval_2').click(function (e) {
+                        jQuery('#' + condition_id + '_eval_2').html(
+                            getShortcodeAttributeOptionsList('reset') + getGlobalVarOptionsList());
                     });
                 });
                 jQuery('#add_shortcode_condition').show();
@@ -804,7 +910,7 @@
             // check that if and evaluate are selected if trying to use conditions
             if (has_conditions_Yes) {
                 // evaluate
-                jQuery('[name="agsg_shortcode_condition_attribute[]"]').each(function (e) {
+                jQuery('[name="agsg_shortcode_condition_eval_1[]"]').each(function (e) {
                     if (jQuery(this).find('option:selected').val() === 'select') {
                         jQuery(this).parent().parent().addClass('form-invalid');
                         jQuery(this).parent().find('.error').remove();
@@ -921,15 +1027,139 @@
      */
     function getShortcodeAttributeOptionsList(reset) {
         if (reset === 'reset') {
-            var html = '<option value="select" selected="selected">Reset - Select Attribute</option>';
+            var html = '<option value="select" selected="selected">Reset - Select Attribute or Global Variable</option>';
         } else {
-            var html = '<option value="select" selected="selected">Select Attribute</option>';
+            var html = '<option value="select" selected="selected">Select Attribute or Global Variable</option>';
         }
         // build a list of options from the attributes
         jQuery('[name="agsg_att_name[]"]').each(function (e) {
             var oVal = jQuery(this).val();
             html += '<option value="' + oVal + '">' + oVal + '</option>';
         });
+        return html;
+    }
+
+    /**
+     * Build a list of global WordPress variable options in HTML
+     * @returns {string}
+     */
+    function getGlobalVarOptionsList() {
+        var html;
+        var oVal;
+        // build a list of options from the post object
+        html += '<optgroup label="Inside The Loop Globals: Post Object">';
+        var oVals = [
+            'post->ID',
+            'post->post_author',
+            'post->post_name',
+            'post->post_type',
+            'post->post_title',
+            'post->post_date',
+            'post->post_date_gmt',
+            'post->post_content',
+            'post->post_excerpt',
+            'post->post_status',
+            'post->comment_status',
+            'post->ping_status',
+            'post->post_password',
+            'post->post_parent',
+            'post->post_modified',
+            'post->post_modified_gmt',
+            'post->comment_count'
+        ];
+        for (var i = 0; i < oVals.length; i++) {
+            oVal = oVals[i];
+            html += '<option value="' + oVal + '">$' + oVal + '</option>';
+        }
+        html += '</optgroup>';
+
+        // build a list of options from the author data object
+        html += '<optgroup label="Inside The Loop Globals: Author Data">';
+        oVals = [
+            'post->authordata->ID',
+            'post->authordata->user_login',
+            'post->authordata->user_nicename',
+            'post->authordata->user_email',
+            'post->authordata->user_url',
+            'post->authordata->user_registered',
+            'post->authordata->user_activation_key',
+            'post->authordata->user_status',
+            'post->authordata->display_name',
+            'post->authordata->firstname',
+            'post->authordata->lastname',
+            'post->authordata->nickname'
+        ];
+        for (var i = 0; i < oVals.length; i++) {
+            oVal = oVals[i];
+            html += '<option value="' + oVal + '">$' + oVal + '</option>';
+        }
+        html += '</optgroup>';
+
+        // build a list of options from the rest of the inside loop globals
+        html += '<optgroup label="Inside The Loop Globals: Misc">';
+        oVals = [
+            'post->currentday',
+            'post->currentmonth',
+            'post->page',
+            'post->multiplepage',
+            'post->more',
+            'post->numpages'
+        ];
+        for (var i = 0; i < oVals.length; i++) {
+            oVal = oVals[i];
+            html += '<option value="' + oVal + '">$' + oVal + '</option>';
+        }
+        html += '</optgroup>';
+
+        // build a list of options from the rest of the Browser Detection globals
+        html += '<optgroup label="Browser Detection Globals (Boolean Values)">';
+        oVals = [
+            'is_iphone',
+            'is_chrome',
+            'is_safari',
+            'is_NS4',
+            'is_opera',
+            'is_macIE',
+            'is_winIE',
+            'is_gecko',
+            'is_lynx',
+            'is_IE'
+        ];
+        for (var i = 0; i < oVals.length; i++) {
+            oVal = oVals[i];
+            html += '<option value="' + oVal + '">$' + oVal + '</option>';
+        }
+        html += '</optgroup>';
+
+        // build a list of options from the rest of the Web Server Detectionglobals
+        html += '<optgroup label="Web Server Detection Globals (Boolean Values)">';
+        oVals = [
+            'is_apache',
+            'is_IIS',
+            'is_iis7'
+        ];
+        for (var i = 0; i < oVals.length; i++) {
+            oVal = oVals[i];
+            html += '<option value="' + oVal + '">$' + oVal + '</option>';
+        }
+        html += '</optgroup>';
+
+        // build a list of options from the rest of the Version Variables globals
+        html += '<optgroup label="Version Variables Globals">';
+        oVals = [
+            'wp_version',
+            'wp_db_version',
+            'tinymce_version',
+            'manifest_version',
+            'required_php_version',
+            'required_mysql_version'
+        ];
+        for (var i = 0; i < oVals.length; i++) {
+            oVal = oVals[i];
+            html += '<option value="' + oVal + '">$' + oVal + '</option>';
+        }
+        html += '</optgroup>';
+
         return html;
     }
 

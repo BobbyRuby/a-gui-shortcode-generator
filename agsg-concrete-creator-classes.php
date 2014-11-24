@@ -44,13 +44,25 @@ class agsgNonATTgenerator extends agsgShortcodeGenerator
 }
 
 /**
- * Allow conditions inside the content that can be controlled by shortcode attributes, items in the globals array,
+ * Allow condition statements to be controlled by global and post variables
+ * Add in ability to use if else statements - May require rework of conditions to thickbox - examine the way conditions are added.
+ *
+ * The ways that scripts and styles are conditionally enqueue is:
+ * 1 - Via adding them in HTML 5 syntax to the WYSIWYG editor that is controlled by the condition in question.
+ * 2 - By setting a string value that calls enqueue script / style for that script when the string value is found in the post's content
  *
  *
- *
- *
+ ******
+ * All types may have multiple embedded styles / scripts and or external ones.
  *
  * Shortcode Types
- * 1 - Enclosed shortcode with no shortcode attributes but has conditions for the content through using the globals array.
- * 2 - Emclosed shortcode
+ ** Enclosed
+ *** 1 - Enclosed shortcodes that display conditional content above or below the enclosed content or both.
+ *** 2 - Enclosed shortcodes that have html attributes populated by shortcode attributes through mapping.
+ *** 3 - Enclosed shortcodes that have html attributes populated by shortcode attributes through mapping, that display conditional content above or below, have static external scripts / styles, conditional external script and styles, and / or embedded scripts and styles.
+ *** -- - Enclosed shortcodes that have nothing but the base classes, an id, or styles.
+ ** Enclosed
+ *** 1 - Enclosed shortcodes that display conditional content above or below the enclosed content or both.
+ *** 2 - Enclosed shortcode that have html attributes populated by shortcode attributes through mapping.
+ *
  */
